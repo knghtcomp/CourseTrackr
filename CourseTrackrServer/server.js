@@ -73,6 +73,20 @@ app.post('/api/setup', async (req, res) => {
     }
 });
 
+// Inside your Node/Express server
+// GET /api/students - Fetch only ACTIVE students
+app.get('/api/students', async (req, res) => {
+  try {
+    // 🚨 We added the WHERE is_active = true clause here!
+    const allStudents = await pool.query(
+      "SELECT * FROM users WHERE role = 'student' AND is_active = true"
+    ); 
+    res.json(allStudents.rows);
+  } catch (err) {
+    console.error("Fetch Students Error:", err.message);
+    res.status(500).send("Server Error");
+  }
+});
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
 app.get('/api/student-records/:user_id', async (req, res) => {
     const { user_id } = req.params;
@@ -272,6 +286,21 @@ app.post('/api/records', async (req, res) => {
     }
 });
 
+// DELETE /api/students/:id - "Soft Delete" (Archive) a student
+app.delete('/api/students/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 🚨 We no longer delete academic_records! 
+    // We just update the user to hide them from the main system.
+    await pool.query('UPDATE users SET is_active = false WHERE id = $1', [id]);
+
+    res.status(200).json({ message: "Student successfully archived." });
+  } catch (err) {
+    console.error("Archive Error:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
