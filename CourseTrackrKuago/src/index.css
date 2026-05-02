@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+
+@font-face {
+  font-family: 'Calistoga';
+  src: url('./assets/fonts/Calistoga-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Castoro';
+  src: url('./assets/fonts/Castoro-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --color-primary: #003366; 
+  --color-secondary: #E9EBEF;
+  --color-background: #FFFFFF;
+  --color-USTPBlue: #00336650;
+  --color-USTPYellow: #FFCC00;
+  --color-RoyalBlue: #004D99;
+  --font-sans: 'Calistoga', sans-serif;
+  --font-serif: 'Castoro', serif;
+}
+
+body {
+  overflow-y: scroll;
+}
