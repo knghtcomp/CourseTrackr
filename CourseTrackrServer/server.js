@@ -79,31 +79,44 @@ const { formatTitleCase } = require('./utils');
 // app.post('/api/students', async (req, res) => { ...
 // Inside your Node/Express server
 // GET /api/students - Fetch only ACTIVE students
+// GET /api/students - Fetch only ACTIVE students
+// GET /api/students - Fetch only ACTIVE students
+// GET /api/students - Fetch only ACTIVE students
 app.get('/api/students', async (req, res) => {
   try {
-    // 🚨 We added the WHERE is_active = true clause here!
-    const allStudents = await pool.query(
-      "SELECT * FROM users WHERE role = 'student' AND is_active = true"
-    ); 
+    const allStudents = await pool.query(`
+        SELECT 
+            id, 
+            first_name, 
+            last_name, 
+            first_name || ' ' || last_name AS name, 
+            email, 
+            school_id, 
+            year_standing 
+        FROM users 
+        WHERE role = 'student' AND is_active = true
+        ORDER BY last_name ASC
+    `); 
     res.json(allStudents.rows);
   } catch (err) {
     console.error("Fetch Students Error:", err.message);
     res.status(500).send("Server Error");
   }
 });
+
+
+// GET /api/student-records/:user_id - Feed the Dashboard Cards
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
 app.get('/api/student-records/:user_id', async (req, res) => {
     const { user_id } = req.params;
 
-    // THE FIX: Check if user_id is NOT a number (e.g., "master-admin")
     if (isNaN(user_id)) {
-        // Return an empty array early so the database query never runs
         return res.status(200).json([]);
     }
 
     try {
         const recordsRes = await pool.query(`
-            SELECT c.id, c.code, c.title AS name, c.units, ar.status 
+            SELECT c.id, c.code, c.title AS name, c.units, ar.status, ar.is_petitioned 
             FROM academic_records ar
             JOIN courses c ON ar.course_id = c.id
             WHERE ar.user_id = $1
@@ -267,37 +280,35 @@ app.post('/api/login', async (req, res) => {
 });
 
 // POST /api/records - Save student course selections from Setup
+// POST /api/records - Save student course selections from Setup
 app.post('/api/records', async (req, res) => {
-    const { user_id, records } = req.body;
+    const { user_id, records, year_standing } = req.body;
 
     try {
-        // 1. Clear out old records for this user to avoid duplicates
+        // 1. Wipe old records for this specific user
         await pool.query('DELETE FROM academic_records WHERE user_id = $1', [user_id]);
 
-        // 2. Loop through the records (this now includes dual rows for petitions)
+        // 2. Insert each record sent from the Setup page
         for (let record of records) {
-            // We use a simple INSERT. Since we DELETED above, we don't need ON CONFLICT
             await pool.query(
-                `INSERT INTO academic_records (user_id, course_id, status) 
-                 VALUES ($1, $2, $3)`,
-                [user_id, record.course_id, record.status]
+                'INSERT INTO academic_records (user_id, course_id, status, is_petitioned) VALUES ($1, $2, $3, $4)',
+                [user_id, record.course_id, record.status, record.is_petitioned || false]
             );
         }
 
-        // 3. Update the student's year standing if provided
-        if (req.body.year_standing) {
+        // 3. Update Year Standing
+        if (year_standing) {
             await pool.query(
                 'UPDATE users SET year_standing = $1 WHERE id = $2',
-                [req.body.year_standing, user_id]
+                [year_standing, user_id]
             );
         }
 
-        res.status(200).json({ message: "Academic setup saved successfully!" });
+        res.status(200).json({ message: "Academic records updated successfully!" });
 
     } catch (err) {
-        console.error("Save Records Error:", err.message);
-        // This will print the specific PG error (like a constraint violation) to your terminal
-        res.status(500).json({ message: "Server Error: " + err.message });
+        console.error("Database Save Error:", err.message);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
 });
 
