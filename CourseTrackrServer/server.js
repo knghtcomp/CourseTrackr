@@ -72,7 +72,11 @@ app.post('/api/setup', async (req, res) => {
         res.status(500).json({ message: "Server Error saving setup." });
     }
 });
+// Helper function to force "Title Case"
 
+const { formatTitleCase } = require('./utils');
+// Your routes go below this...
+// app.post('/api/students', async (req, res) => { ...
 // Inside your Node/Express server
 // GET /api/students - Fetch only ACTIVE students
 app.get('/api/students', async (req, res) => {
@@ -90,6 +94,12 @@ app.get('/api/students', async (req, res) => {
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
 app.get('/api/student-records/:user_id', async (req, res) => {
     const { user_id } = req.params;
+
+    // THE FIX: Check if user_id is NOT a number (e.g., "master-admin")
+    if (isNaN(user_id)) {
+        // Return an empty array early so the database query never runs
+        return res.status(200).json([]);
+    }
 
     try {
         const recordsRes = await pool.query(`
@@ -261,9 +271,12 @@ app.post('/api/records', async (req, res) => {
     const { user_id, records } = req.body;
 
     try {
+        // 1. Clear out old records for this user to avoid duplicates
         await pool.query('DELETE FROM academic_records WHERE user_id = $1', [user_id]);
 
+        // 2. Loop through the records (this now includes dual rows for petitions)
         for (let record of records) {
+            // We use a simple INSERT. Since we DELETED above, we don't need ON CONFLICT
             await pool.query(
                 `INSERT INTO academic_records (user_id, course_id, status) 
                  VALUES ($1, $2, $3)`,
@@ -271,6 +284,7 @@ app.post('/api/records', async (req, res) => {
             );
         }
 
+        // 3. Update the student's year standing if provided
         if (req.body.year_standing) {
             await pool.query(
                 'UPDATE users SET year_standing = $1 WHERE id = $2',
@@ -282,7 +296,8 @@ app.post('/api/records', async (req, res) => {
 
     } catch (err) {
         console.error("Save Records Error:", err.message);
-        res.status(500).json({ message: "Server Error saving records." });
+        // This will print the specific PG error (like a constraint violation) to your terminal
+        res.status(500).json({ message: "Server Error: " + err.message });
     }
 });
 
@@ -301,6 +316,118 @@ app.delete('/api/students/:id', async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// POST: Create a new course petition
+app.post('/api/petitions', async (req, res) => {
+  const { student_id, course_id } = req.body;
+
+  try {
+    // Check if the student already has a 'pending' petition for this exact course
+    const checkQuery = `
+      SELECT * FROM petitions 
+      WHERE user_id = $1 AND course_id = $2 AND status = 'pending'
+    `;
+    const existingPetition = await pool.query(checkQuery, [student_id, course_id]);
+
+    if (existingPetition.rows.length > 0) {
+      return res.status(400).json({ message: "You already have a pending petition for this course." });
+    }
+
+    // Insert the new petition
+    const insertQuery = `
+      INSERT INTO petitions (user_id, course_id, status) 
+      VALUES ($1, $2, 'pending') 
+      RETURNING *
+    `;
+    const newPetition = await pool.query(insertQuery, [student_id, course_id]);
+
+    res.status(201).json({ 
+      message: "Petition submitted successfully", 
+      petition: newPetition.rows[0] 
+    });
+
+  } catch (error) {
+    console.error("Error submitting petition:", error);
+    res.status(500).json({ error: "Failed to submit petition." });
+  }
+});
+
+// GET: Fetch all active petitions (Grouped for the Admin Dashboard)
+app.get('/api/petitions', async (req, res) => {
+  try {
+    const groupedQuery = `
+      SELECT 
+        p.course_id,
+        COUNT(p.id) as total_requests,
+        json_agg(
+          json_build_object(
+            'petition_id', p.id,
+            'student_id', u.id,
+            'school_id', u.school_id,
+            'student_name', u.first_name || ' ' || u.last_name,
+            'status', p.status,
+            'date_requested', p.created_at
+          )
+        ) as students
+      FROM petitions p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.status = 'pending'
+      GROUP BY p.course_id
+      ORDER BY total_requests DESC;
+    `;
+
+    const result = await pool.query(groupedQuery);
+    
+    // The result is a beautifully formatted JSON array ready for your React Admin Dashboard
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error("Error fetching petitions:", error);
+    res.status(500).json({ error: "Failed to fetch petitions." });
+  }
+});
+
+app.post('/api/petitions/:id/approve', async (req, res) => {
+  const petitionId = req.params.id;
+  const { studentId, courseId } = req.body;
+
+  try {
+    // 1. Update petition status
+    await pool.query('UPDATE petitions SET status = $1 WHERE id = $2', ['approved', petitionId]);
+
+    // 2. "Unlock" the course by adding it to student_records
+    // We set status to 'passed' so the student's logic clears the prerequisite
+    await pool.query(
+      'INSERT INTO academic_records (student_id, course_id, status) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+      [studentId, courseId, 'passed']
+    );
+
+    res.status(200).json({ message: "Petition approved and course unlocked." });
+  } catch (err) {
+    res.status(500).json({ error: "Database error during approval." });
+  }
+});
+
+// PUT: Update a student's basic profile
+app.put('/api/students/:id', async (req, res) => {
+  const studentId = req.params.id;
+  const { first_name, last_name, school_id, email, year_standing } = req.body;
+
+  try {
+    const updateQuery = `
+      UPDATE users 
+      SET first_name = $1, last_name = $2, school_id = $3, email = $4, year_standing = $5 
+      WHERE id = $6
+    `;
+    await pool.query(updateQuery, [first_name, last_name, school_id, email, year_standing, studentId]);
+
+    res.status(200).json({ message: "Student profile updated successfully!" });
+  } catch (error) {
+    console.error("Error updating student profile:", error);
+    res.status(500).json({ error: "Failed to update student profile in database." });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
