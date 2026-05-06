@@ -59,9 +59,9 @@ app.post('/api/setup', async (req, res) => {
 
         for (let record of records) {
             await pool.query(
-                `INSERT INTO academic_records (user_id, course_id, status) 
-                 VALUES ($1, $2, $3)`,
-                [user_id, record.course_id, record.status] 
+                `INSERT INTO academic_records (user_id, course_id, status, is_petitioned) 
+                 VALUES ($1, $2, $3, $4)`,
+                [user_id, record.course_id, record.status, record.is_petitioned || false] 
             );
         }
 
@@ -329,37 +329,30 @@ app.delete('/api/students/:id', async (req, res) => {
 });
 
 // POST: Create a new course petition
+// POST: Create a new course petition
 app.post('/api/petitions', async (req, res) => {
   const { student_id, course_id } = req.body;
 
   try {
-    // Check if the student already has a 'pending' petition for this exact course
-    const checkQuery = `
-      SELECT * FROM petitions 
-      WHERE user_id = $1 AND course_id = $2 AND status = 'pending'
-    `;
-    const existingPetition = await pool.query(checkQuery, [student_id, course_id]);
+    // Attempt to insert it as a brand new record in academic_records
+    await pool.query(`
+      INSERT INTO academic_records (user_id, course_id, status, is_petitioned) 
+      VALUES ($1, $2, 'ongoing', true)
+    `, [student_id, course_id]);
 
-    if (existingPetition.rows.length > 0) {
-      return res.status(400).json({ message: "You already have a pending petition for this course." });
-    }
-
-    // Insert the new petition
-    const insertQuery = `
-      INSERT INTO petitions (user_id, course_id, status) 
-      VALUES ($1, $2, 'pending') 
-      RETURNING *
-    `;
-    const newPetition = await pool.query(insertQuery, [student_id, course_id]);
-
-    res.status(201).json({ 
-      message: "Petition submitted successfully", 
-      petition: newPetition.rows[0] 
-    });
-
+    res.status(201).json({ message: "Petition submitted successfully" });
   } catch (error) {
-    console.error("Error submitting petition:", error);
-    res.status(500).json({ error: "Failed to submit petition." });
+    // If the record already exists, just flip the petition switch to true!
+    try {
+      await pool.query(
+        "UPDATE academic_records SET is_petitioned = true WHERE user_id = $1 AND course_id = $2",
+        [student_id, course_id]
+      );
+      res.status(200).json({ message: "Petition updated successfully" });
+    } catch (fallbackError) {
+      console.error("Error submitting petition:", fallbackError);
+      res.status(500).json({ error: "Failed to submit petition." });
+    }
   }
 });
 
@@ -368,28 +361,26 @@ app.get('/api/petitions', async (req, res) => {
   try {
     const groupedQuery = `
       SELECT 
-        p.course_id,
-        COUNT(p.id) as total_requests,
+        ar.course_id,
+        COUNT(ar.user_id) as total_requests,
         json_agg(
           json_build_object(
-            'petition_id', p.id,
+            'petition_id', ar.user_id,
             'student_id', u.id,
             'school_id', u.school_id,
             'student_name', u.first_name || ' ' || u.last_name,
-            'status', p.status,
-            'date_requested', p.created_at
+            'status', 'pending',
+            'date_requested', CURRENT_DATE
           )
         ) as students
-      FROM petitions p
-      JOIN users u ON p.user_id = u.id
-      WHERE p.status = 'pending'
-      GROUP BY p.course_id
+      FROM academic_records ar
+      JOIN users u ON ar.user_id = u.id
+      WHERE ar.is_petitioned = true
+      GROUP BY ar.course_id
       ORDER BY total_requests DESC;
     `;
 
     const result = await pool.query(groupedQuery);
-    
-    // The result is a beautifully formatted JSON array ready for your React Admin Dashboard
     res.status(200).json(result.rows);
 
   } catch (error) {
@@ -398,23 +389,20 @@ app.get('/api/petitions', async (req, res) => {
   }
 });
 
+// POST: Approve a petition
 app.post('/api/petitions/:id/approve', async (req, res) => {
-  const petitionId = req.params.id;
   const { studentId, courseId } = req.body;
 
   try {
-    // 1. Update petition status
-    await pool.query('UPDATE petitions SET status = $1 WHERE id = $2', ['approved', petitionId]);
-
-    // 2. "Unlock" the course by adding it to student_records
-    // We set status to 'passed' so the student's logic clears the prerequisite
+    // "Unlock" the course by removing the petition flag and marking it 'passed'
     await pool.query(
-      'INSERT INTO academic_records (student_id, course_id, status) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-      [studentId, courseId, 'passed']
+      "UPDATE academic_records SET is_petitioned = false, status = 'passed' WHERE user_id = $1 AND course_id = $2",
+      [studentId, courseId]
     );
 
     res.status(200).json({ message: "Petition approved and course unlocked." });
   } catch (err) {
+    console.error("Approval Error:", err.message);
     res.status(500).json({ error: "Database error during approval." });
   }
 });

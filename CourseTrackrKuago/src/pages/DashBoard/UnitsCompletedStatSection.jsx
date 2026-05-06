@@ -11,7 +11,7 @@ export const UnitsCompletedStatsSection = ({ count }) => {
           </p>
         </div>
         <p className="text-black/60 text-xs font-medium font-['Inter'] pl-8">
-          Out of 173 Units
+          Out of 179 Units
         </p>
       </div>
       <h3 className="text-[#003366] text-5xl font-bold font-['Inter'] leading-none">

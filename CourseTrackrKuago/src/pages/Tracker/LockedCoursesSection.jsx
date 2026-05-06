@@ -12,7 +12,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
 
   const normalize = (str) => str ? str.toString().trim().toUpperCase() : "";
 
-  // 1. FETCH DATA (Same as before)
+  // 1. FETCH DATA
   useEffect(() => {
     const fetchFreshData = async () => {
       const currentUserStr = localStorage.getItem('currentUser');
@@ -38,11 +38,10 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
     fetchFreshData();
   }, []);
 
-  // 🚨 NEW HANDLER: Send Petition to Backend 🚨
+  // HANDLER: Send Petition to Backend
   const handlePetition = async (courseId) => {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
-    // Add to "submitting" state to show loading/pending immediately
     setSubmittingIds(prev => new Set(prev).add(courseId));
 
     try {
@@ -67,7 +66,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
     }
   };
 
-  // 2. THE STRICT ENGINE (Keep your existing logic from previous steps)
+  // 2. THE STRICT TWO-PASS ENGINE (Mirrored from FutureCoursesSection)
   useEffect(() => {
     if (isLoading) return;
 
@@ -80,23 +79,26 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
     let hasAnyOngoing = false;
     let totalUnfinishedCourses = 0; 
 
+    // Map out where the student currently is in the curriculum
     curriculum.forEach((term, index) => {
       term.courses.forEach(course => {
         const status = getCourseStatus(course.code);
+        
         if (status === 'passed' || status === 'ongoing') {
           if (index > highestActiveIndex) highestActiveIndex = index;
           if (status === 'ongoing') hasAnyOngoing = true;
         }
+
         if (index < 7 && status !== 'passed') {
            totalUnfinishedCourses++;
         }
       });
     });
 
+    // 🚨 THE FIX: Perfectly synced Target Term Finder
     let targetIndex = -1;
     let seasonKeyword = upcomingTerm === "Summer" ? "Summer" : "1st Semester"; 
 
-    // Find the target term based strictly on the prop
     if (highestActiveIndex === -1) {
       if (upcomingTerm === "Summer") {
         targetIndex = curriculum.findIndex(t => t.semester.includes("Summer"));
@@ -130,7 +132,8 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
     }
 
     let tempCourseStates = {};
-
+    
+    // --- PASS 1: Strict Prerequisite Evaluation ---
     curriculum.forEach((term, termIndex) => {
       term.courses.forEach(course => {
         const currentStatus = getCourseStatus(course.code);
@@ -141,39 +144,38 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
         let missingReasons = [];
 
         if (course.prereq) {
-          const prereqList = course.prereq.split(',').map(p => p.trim());
+          const prereqList = course.prereq.split(',').map(p => normalize(p));
           
-          for (let originalCode of prereqList) {
-            const normalizedCode = normalize(originalCode);
-
-            if (normalizedCode.includes("YEAR")) {
-              const requiredYear = parseInt(normalizedCode); 
+          for (let prereqCode of prereqList) {
+            
+            if (prereqCode.includes("YEAR")) {
+              const requiredYear = parseInt(prereqCode); 
               if (studentYear < requiredYear) {
                 if (hasAnyOngoing && (studentYear + 1 >= requiredYear)) {
                   isAssumed = true;
                 } else {
-                  prereqsMet = false;
-                  missingReasons.push(originalCode);
+                  prereqsMet = false; 
+                  missingReasons.push(prereqCode);
                 }
               }
             } 
-            else if (normalizedCode.includes("BEHIND")) {
-              if (totalUnfinishedCourses > 0) {
-                prereqsMet = false;
-                missingReasons.push("Remaining Subjects");
-              } else if (hasAnyOngoing) {
-                isAssumed = true;
-              }
-            } 
+            else if (prereqCode.includes("BEHIND")) {
+               if (totalUnfinishedCourses > 0) {
+                 prereqsMet = false;
+                 missingReasons.push("Remaining Subjects");
+               } else if (hasAnyOngoing) {
+                 isAssumed = true;
+               }
+            }
             else {
-              const prereqStatus = getCourseStatus(normalizedCode);
+              const prereqStatus = getCourseStatus(prereqCode);
               if (prereqStatus === 'passed') {
                 // Good
               } else if (prereqStatus === 'ongoing') {
                 isAssumed = true; 
               } else {
-                prereqsMet = false;
-                missingReasons.push(originalCode); 
+                prereqsMet = false; 
+                missingReasons.push(prereqCode);
               }
             }
           }
@@ -184,12 +186,13 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
         else if (isAssumed) finalState = 'Assumed';
 
         tempCourseStates[normalize(course.code)] = {
+          ...course,
           id: course.id,
           code: course.code,
           name: course.title,
-          semester: term.semester,
+          semesterLabel: term.semester,
           termIndex: termIndex,
-          units: `${course.units} Units`, 
+          units: `${course.units} Units`,
           unlockState: finalState,
           missingReasons: missingReasons,
           coreq: course.coreq
@@ -197,25 +200,26 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
       });
     });
 
+    // --- PASS 2: Corequisite Evaluation ---
     Object.keys(tempCourseStates).forEach(courseKey => {
       const courseObj = tempCourseStates[courseKey];
       if (courseObj.unlockState === 'Locked') return;
 
       if (courseObj.coreq) {
-        const coreqList = courseObj.coreq.split(',').map(c => c.trim());
-        for (let originalCoreq of coreqList) {
-          const normalizedCoreq = normalize(originalCoreq);
-          const coreqDbStatus = getCourseStatus(normalizedCoreq);
+        const coreqList = courseObj.coreq.split(',').map(c => normalize(c));
+
+        for (let coreqCode of coreqList) {
+          const coreqDbStatus = getCourseStatus(coreqCode);
 
           if (coreqDbStatus === 'passed') {
-            // Coreq is fine
+            // Coreq is already finished
           } else if (coreqDbStatus === 'ongoing') {
             courseObj.unlockState = 'Assumed';
           } else {
-            const futureCoreq = tempCourseStates[normalizedCoreq];
+            const futureCoreq = tempCourseStates[coreqCode];
             if (!futureCoreq || futureCoreq.unlockState === 'Locked') {
               courseObj.unlockState = 'Locked';
-              courseObj.missingReasons.push(`${originalCoreq} (Coreq)`);
+              courseObj.missingReasons.push(`${coreqCode} (Coreq)`);
             } else if (futureCoreq.unlockState === 'Assumed') {
               courseObj.unlockState = 'Assumed';
             }
@@ -224,14 +228,18 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
       }
     });
 
-    const finalLockedCourses = Object.values(tempCourseStates)
+    // 🚨 THE FIX: Final UI Filter matching FutureCourses exactly
+    const processedCourses = Object.values(tempCourseStates);
+
+    const finalLockedCourses = processedCourses
       .filter(course => 
         course.unlockState === 'Locked' && 
         course.termIndex <= targetIndex && 
-        course.semester.includes(seasonKeyword) 
+        course.semesterLabel.includes(seasonKeyword) // This strictly isolates the correct semester!
       )
       .map(course => ({
         ...course,
+        semester: course.semesterLabel, // Mapping for your specific UI
         missingPrereq: course.missingReasons.join(', ')
       }));
 
@@ -252,40 +260,62 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
           <p className="text-[#10B981] font-bold font-['Inter']">🎉 No locked courses for your upcoming term!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {lockedCourses.map((course) => (
-            /* We increase the height slightly to h-44 to accommodate the new button */
-            <div key={course.id} className="bg-gray-100/80 rounded-xl border border-gray-300 p-4 flex flex-col h-44 justify-between shadow-sm relative overflow-hidden grayscale-[30%]">
+            <div 
+              key={course.id} 
+              className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-3 flex flex-col justify-between shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] relative overflow-hidden transition-all hover:border-red-200 hover:bg-red-50/10 group"
+            >
               
-              <div className="absolute top-3 right-3 bg-red-100/50 border border-red-300 px-2 py-0.5 rounded text-red-600 text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
+              {/* Sleek Lock Badge */}
+              <div className="absolute top-2.5 right-2.5 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded text-red-500 text-[9px] font-bold font-['Inter'] uppercase tracking-wider flex items-center gap-1 shadow-sm">
                 <span>🔒</span> Locked
               </div>
 
-              <div className="flex flex-col pr-16 mt-1">
-                <p className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-black/50 leading-none">{course.semester}</p>
-                <h3 className="text-xl font-bold font-['Calistoga'] leading-none mt-1.5 text-[#003366]/60">{course.code}</h3>
-                <p className="text-sm font-medium font-['Inter'] leading-snug mt-1.5 line-clamp-1 text-black/60">{course.name}</p>
+              {/* Course Identity */}
+              <div className="flex flex-col pr-14 mb-2">
+                <p className="text-[9px] font-extrabold font-['Inter'] uppercase tracking-widest text-black/40 mb-0.5">
+                  {course.semester}
+                </p>
+                <h3 className="text-lg font-bold font-['Calistoga'] leading-none text-red-500 group-hover:text-red-400 transition-colors">
+                  {course.code}
+                </h3>
+                <p className="text-xs font-medium font-['Inter'] leading-tight mt-1 line-clamp-1 text-gray-700">
+                  {course.name}
+                </p>
               </div>
               
-              {/* PETITION BUTTON AREA */}
-              <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-300">
-                {submittingIds.has(course.id) ? (
-                  <button disabled className="bg-amber-100 text-amber-600 border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-bold font['Inter'] flex items-center gap-1.5">
-                    ⏳ Petition Pending
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => handlePetition(course.id)}
-                    className="bg-[#FFCC00] hover:bg-[#E6B800] text-[#001A33] rounded-lg px-3 py-1.5 text-xs font-bold font-['Inter'] transition-colors flex items-center gap-1.5 shadow-sm"
+              {/* PREREQUISITES & COREQUISITES AREA */}
+              <div className="flex flex-col gap-0.5 mb-2 mt-auto">
+                {course.missingPrereq && (
+                  <p 
+                    className="text-[10px] font-medium font-['Inter'] text-red-500 leading-tight line-clamp-1"
+                    title={course.missingPrereq}
                   >
-                    📝 Petition Course
-                  </button>
+                    <span className="font-bold">Pre:</span> {course.missingPrereq}
+                  </p>
                 )}
+                
+                {course.coreq && course.coreq.toLowerCase() !== 'none' && (
+                  <p 
+                    className="text-[10px] font-medium font-['Inter'] text-orange-500 leading-tight line-clamp-1"
+                    title={course.coreq}
+                  >
+                    <span className="font-bold">Co:</span> {course.coreq}
+                  </p>
+                )}
+              </div>
 
-                <div className="bg-gray-400 text-white rounded-lg px-2 py-1 text-[10px] font-bold font-['Inter']">
+              {/* FOOTER */}
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <span className="text-[9px] font-medium font-['Inter'] text-gray-400 italic">
+                  Complete reqs to unlock
+                </span>
+                <div className="bg-black/5 text-black/60 rounded px-1.5 py-0.5 text-[9px] font-bold font-['Inter'] tracking-wide uppercase">
                   {course.units}
                 </div>
               </div>
+
             </div>
           ))}
         </div>

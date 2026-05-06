@@ -1,44 +1,32 @@
 import React, { useMemo } from 'react';
-
+import { curriculum } from '../../data/curriculumData';
 export const VerifyStudentModal = ({ student, onClose }) => {
   
-  // Auto-merge the raw database rows
+  // A massively simplified data reader since the database is now perfectly structured
   const { displayCourses, completedCount, enrolledCount, petitionedCount } = useMemo(() => {
-    const courseMap = new Map();
-    
-    (student.courses || []).forEach(course => {
-      const key = course.code; 
-      
-      if (!courseMap.has(key)) {
-        courseMap.set(key, { 
-          ...course, 
-          isPetitioned: false,
-          status: course.status === 'petitioned' ? 'pending' : course.status 
-        });
-      }
-      
-      const current = courseMap.get(key);
-      
-      if (course.status === 'petitioned') {
-        current.isPetitioned = true;
-      } else if (course.status) {
-        current.status = course.status;
-      }
-    });
-
-    const mergedCourses = Array.from(courseMap.values());
+    const safeCourses = student.courses || [];
 
     return {
-      // 🚨 UI FIX: Strictly filter to ONLY show 'ongoing' (Enrolled) courses
-      displayCourses: mergedCourses.filter(c => c.status === 'ongoing'),
+      // Strictly filter to ONLY show 'ongoing' (Enrolled) courses in the list
+      displayCourses: safeCourses.filter(c => c.status === 'ongoing'),
       
-      // The stat counters remain accurate
-      completedCount: mergedCourses.filter(c => c.status === 'passed').length,
-      enrolledCount: mergedCourses.filter(c => c.status === 'ongoing').length,
-      petitionedCount: mergedCourses.filter(c => c.isPetitioned).length
+      // Accurately count the totals from the database
+      completedCount: safeCourses.filter(c => c.status === 'passed').length,
+      enrolledCount: safeCourses.filter(c => c.status === 'ongoing').length,
+      // Safely checks the boolean flag from the backend
+      petitionedCount: safeCourses.filter(c => c.isPetitioned === true).length
     };
   }, [student.courses]);
 
+  const getCourseDescription = (courseCode) => {
+    for (let term of curriculum) {
+      const foundCourse = term.courses.find(c => c.code === courseCode);
+      if (foundCourse) {
+        return foundCourse.title || foundCourse.name;
+      }
+    }
+    return "Description not found";
+  };
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col relative">
@@ -86,24 +74,44 @@ export const VerifyStudentModal = ({ student, onClose }) => {
                 displayCourses.map((course, idx) => (
                   <div 
                     key={idx} 
-                    className="border p-4 rounded-xl flex justify-between items-center transition-all bg-gray-50 border-gray-100"
+                    className={`border p-4 rounded-xl flex justify-between items-start transition-all ${
+                      course.isPetitioned 
+                        ? 'bg-purple-50/30 border-purple-200' 
+                        : 'bg-gray-50 border-gray-100'
+                    }`}
                   >
-                    <div>
-                      <div className="font-bold font-['Inter'] text-[#003366]">
+                    <div className="flex-1 pr-4">
+                      <div className={`font-bold font-['Inter'] ${course.isPetitioned ? 'text-purple-900' : 'text-[#003366]'}`}>
                         {course.code}
                       </div>
-                      <div className="text-gray-500 text-sm font-medium line-clamp-1">{course.title || course.name}</div>
+                      
+                      {/* Course Description (Uses DB data, or safely falls back to Curriculum Data) */}
+                      <div className="text-gray-500 text-xs italic line-clamp-2 mt-1">
+                        {course.title || course.name || getCourseDescription(course.code)}
+                      </div>
                     </div>
                     
-                    <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 ml-4">
-                      
-                      {/* Status Badges */}
-                      {course.status === 'ongoing' && (
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {/* Petitioned Badge */}
+                        {course.isPetitioned && (
+                          <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide bg-purple-100 text-purple-700 border border-purple-200">
+                            ★ Petitioned
+                          </span>
+                        )}
+
+                        {/* Enrolled Badge */}
                         <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide bg-[#F97316]/10 text-[#F97316]">
                           Enrolled
                         </span>
+                      </div>
+                      
+                      {/* Course Units (Optional but helpful for Admins) */}
+                      {course.units && (
+                        <div className="text-gray-400 text-xs font-bold font-['Inter'] uppercase mt-1">
+                          {course.units} Units
+                        </div>
                       )}
-
                     </div>
                   </div>
                 ))

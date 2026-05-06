@@ -28,6 +28,7 @@ export const Setup = () => {
   }, [yearStanding]);
 
   // -- FETCH LOGIC (UPDATED FOR DUAL RECORDS) --
+  // -- FETCH LOGIC (UPDATED FOR SINGLE-ROW RECORDS) --
   useEffect(() => {
     const fetchExistingSetup = async () => {
       const currentUserStr = localStorage.getItem('currentUser');
@@ -53,13 +54,14 @@ export const Setup = () => {
               }
               
               const current = courseMap.get(id);
-              if (record.status === 'petitioned') {
-                current.isPetitioned = true;
-              } else {
-                current.status = record.status; 
-              }
+              
+              // 🚨 THE FIX: Stop looking for the old word 'petitioned'. 
+              // Directly assign both the base status and the new boolean flag from the database!
+              current.status = record.status; 
+              current.isPetitioned = record.is_petitioned === true;
             });
 
+            // Only grab courses that actually have a status
             const formattedForReact = Array.from(courseMap.values()).filter(c => c.status);
             setSelectedCourses(formattedForReact);
           }
@@ -71,8 +73,7 @@ export const Setup = () => {
     };
 
     fetchExistingSetup();
-  }, [navigate]); 
-
+  }, [navigate]);
   // -- CALCULATIONS --
   const totalCourses = selectedCourses.length;
   const totalUnits = selectedCourses.reduce((sum, selectedCourse) => {
@@ -105,7 +106,7 @@ export const Setup = () => {
     return { met: missing.length === 0, missing };
   };
 
-  // 🚨 UPDATED: TOGGLE COURSE LOGIC (Secured Enrollment)
+  // 🚨 UPDATED: TOGGLE COURSE LOGIC (Secured Enrollment & Override)
   const toggleCourse = (course) => {
     const existingCourseIndex = selectedCourses.findIndex(c => c.id === course.id);
 
@@ -114,40 +115,45 @@ export const Setup = () => {
       
       if (existingCourse.status === 'passed') {
         
-        // 🚨 SECURITY CHECK: Can they take this future course?
+        // Check standard prerequisites
         const prereqCheck = checkPrereqs(course.prereq);
         
-        if (prereqCheck.met) {
-          // Allow Enrollment
+        // 🚨 THE FIX: Allow enrollment if prereqs are met OR if it's explicitly petitioned
+        if (prereqCheck.met || existingCourse.isPetitioned) {
           const updatedCourses = [...selectedCourses];
           updatedCourses[existingCourseIndex] = { ...existingCourse, status: 'ongoing' };
           setSelectedCourses(updatedCourses);
         } else {
           // Block Enrollment and cycle to removal
-          alert(`Cannot enroll in ${course.code}.\nMissing completed prerequisites: ${prereqCheck.missing.join(', ')}`);
+          alert(`Cannot enroll in ${course.code}.\nMissing completed prerequisites: ${prereqCheck.missing.join(', ')}\n\nIf you have an approved petition for this, please click the petition button first before changing its status.`);
           setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
         }
 
       } 
       else if (existingCourse.status === 'ongoing') {
+        // Cycle to removed
         setSelectedCourses(selectedCourses.filter(c => c.id !== course.id));
       }
     } else {
-      // First click ALWAYS adds as 'passed' (Freely checking past progress)
+      // First click ALWAYS adds as 'passed' to effortlessly handle historical data entry
       setSelectedCourses([...selectedCourses, { ...course, status: 'passed', isPetitioned: false }]);
     }
   };
 
-  // -- TOGGLE PETITION LOGIC --
+  // 🚨 UPDATED: TOGGLE PETITION LOGIC
   const togglePetition = (course, e) => {
     e.stopPropagation(); 
 
     const existingCourseIndex = selectedCourses.findIndex(c => c.id === course.id);
 
     if (existingCourseIndex >= 0) {
+      // Flip the petition switch if it already exists
       const updatedCourses = [...selectedCourses];
       updatedCourses[existingCourseIndex].isPetitioned = !updatedCourses[existingCourseIndex].isPetitioned;
       setSelectedCourses(updatedCourses);
+    } else {
+      // If they click petition on an unselected course, automatically add it to handle historical petition entries
+      setSelectedCourses([...selectedCourses, { ...course, status: 'passed', isPetitioned: true }]);
     }
   };
 
