@@ -8,6 +8,9 @@ import Tracker from './pages/Tracker/Tracker';
 import AcademicHistory  from './pages/AcademicHistory';
 import Setup from './pages/Setup';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import ResetPassword  from './pages/ResetPassword'; // Adjust path as needed
+
+// Inside your <Routes> block, add this:
 
 
 
@@ -24,6 +27,7 @@ function App() {
         <Route path="/history" element={<AcademicHistory />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

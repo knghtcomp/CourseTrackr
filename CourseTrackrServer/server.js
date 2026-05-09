@@ -427,6 +427,112 @@ app.put('/api/students/:id', async (req, res) => {
   }
 });
 
+
+
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+
+
+
+app.use(cors());
+app.use(express.json());
+
+// POST /api/forgot-password
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // 1. Check if the user exists
+    const userRes = await pool.query('SELECT id, first_name FROM users WHERE email = $1', [email]);
+    
+    if (userRes.rows.length === 0) {
+      return res.status(404).json({ message: "We couldn't find an account with that email." });
+    }
+
+    const user = userRes.rows[0];
+
+    // 2. Generate a secure, random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 3600000); // Token expires in 1 hour
+
+    // 3. Save token to database (You'll need to add these two columns to your users table!)
+    await pool.query(
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
+      [resetToken, tokenExpiry, email]
+    );
+
+    // 4. Set up Nodemailer to use your Gmail
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'joshellicious@gmail.com', // 👈 Type your real email here inside the quotes
+        pass: 'zkgmgoagtjemqvtc'             // 👈 Type your real 16-letter App Password here
+      }
+    });
+
+    // 5. Create the reset link pointing to your React frontend
+    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+
+    // 6. Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h3>Hi ${user.first_name},</h3>
+        <p>You requested a password reset. Click the link below to set a new password:</p>
+        <a href="${resetLink}" style="padding: 10px 20px; background-color: #003366; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Reset Password</a>
+        <p style="margin-top: 20px; font-size: 12px; color: gray;">This link will expire in 1 hour. If you did not request this, please ignore this email.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Password reset email sent!" });
+
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ message: "An error occurred while sending the email." });
+  }
+});
+
+
+// POST /api/reset-password
+app.post('/api/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // 1. Find the user with this token, AND make sure the token hasn't expired yet
+    const userRes = await pool.query(
+      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or expired reset token. Please request a new one." });
+    }
+
+    const userId = userRes.rows[0].id;
+
+    // Optional but highly recommended: If you are using bcrypt to hash passwords, hash it here!
+    // const bcrypt = require('bcrypt');
+    // const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // 2. Update the password and instantly delete the token so it can't be used again
+    await pool.query(
+      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [newPassword, userId] // Change newPassword to hashedPassword if you use bcrypt!
+    );
+
+    res.status(200).json({ message: "Password updated successfully!" });
+
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ message: "An error occurred while resetting the password." });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

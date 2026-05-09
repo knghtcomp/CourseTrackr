@@ -226,7 +226,7 @@ export const Setup = () => {
           <span className="text-6xl mb-4 block">🔒</span>
           <h2 className="text-[#003366] text-3xl font-bold font-['Calistoga'] mb-4">Setup is Locked</h2>
           <p className="text-gray-600 font-medium font-['Inter'] mb-8">
-            The academic setup is currently closed by the Admin. Please contact the registrar if you need to update your records.
+            The academic setup is currently closed by the Admin. Please contact the admin if you need to update your records.
           </p>
           <button 
             onClick={() => navigate('/dashboard')}

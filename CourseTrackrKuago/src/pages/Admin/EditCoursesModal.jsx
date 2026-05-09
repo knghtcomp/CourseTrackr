@@ -261,7 +261,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
               <div className="flex flex-col gap-4 mb-6">
                 
                 <p className="text-gray-600 font-medium text-sm md:text-base m-0">
-                  Click a course to cycle its status: <strong className="text-[#10B981]">Passed</strong> → <strong className="text-[#F59E0B]">Ongoing</strong> → <strong>Pending</strong>.
+                  Click a course to cycle its status: <strong className="text-[#10B981]">Completed</strong> → <strong className="text-[#F59E0B]">Enrolled</strong> → <strong>Pending</strong>.
                 </p>
                 
                 <div className="flex flex-wrap items-center gap-3 lg:gap-4">

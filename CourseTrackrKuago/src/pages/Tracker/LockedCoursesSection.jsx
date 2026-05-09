@@ -10,7 +10,8 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
   // Track which courses are being petitioned in the current session
   const [submittingIds, setSubmittingIds] = useState(new Set());
 
-  const normalize = (str) => str ? str.toString().trim().toUpperCase() : "";
+  // 🚨 FIX 1: The "Space Stripper" - This forces "CPE 111" and "CPE111" to match perfectly
+  const normalize = (str) => str ? str.toString().trim().toUpperCase().replace(/\s+/g, '') : "";
 
   // 1. FETCH DATA
   useEffect(() => {
@@ -21,7 +22,9 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
         return;
       }
       const currentUser = JSON.parse(currentUserStr);
-      setStudentYear(currentUser.yearStanding || 1);
+      
+      // 🚨 FIX 2: Force the year to be a mathematical Number, not a string
+      setStudentYear(Number(currentUser.yearStanding || currentUser.year_standing) || 1);
 
       try {
         const response = await fetch(`http://localhost:5000/api/student-records/${currentUser.id}`);
@@ -41,17 +44,13 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
   // HANDLER: Send Petition to Backend
   const handlePetition = async (courseId) => {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    
     setSubmittingIds(prev => new Set(prev).add(courseId));
 
     try {
       const response = await fetch('http://localhost:5000/api/petitions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          student_id: currentUser.id,
-          course_id: courseId
-        }),
+        body: JSON.stringify({ student_id: currentUser.id, course_id: courseId }),
       });
 
       if (response.ok) {
@@ -66,26 +65,44 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
     }
   };
 
-  // 2. THE STRICT TWO-PASS ENGINE (Mirrored from FutureCoursesSection)
+  // 2. THE BULLETPROOF ENGINE
   useEffect(() => {
     if (isLoading) return;
 
     const getCourseStatus = (courseCode) => {
       const record = userRecords.find(r => normalize(r.code) === normalize(courseCode));
-      return record ? record.status : null; 
+      // Normalize 'FAILED' / 'failed' just to be safe
+      return record && record.status ? record.status.toLowerCase() : null; 
     };
 
-    let highestActiveIndex = -1;
+    // Determine the max boundary the student is allowed to look at based on their year
+    const numberPrefix = studentYear === 1 ? '1st' : studentYear === 2 ? '2nd' : studentYear === 3 ? '3rd' : '4th';
+    let maxAllowedIndex = curriculum.length - 1;
+    
+    for (let i = curriculum.length - 1; i >= 0; i--) {
+      if (curriculum[i].semester.toLowerCase().includes(`${numberPrefix} year`)) {
+        maxAllowedIndex = i;
+        if (i + 1 < curriculum.length && curriculum[i + 1].semester.includes("Summer")) {
+          maxAllowedIndex = i + 1;
+        }
+        break;
+      }
+    }
+
+    let currentActiveIndex = -1;
     let hasAnyOngoing = false;
     let totalUnfinishedCourses = 0; 
 
-    // Map out where the student currently is in the curriculum
+    // Find exactly where the student currently is
     curriculum.forEach((term, index) => {
       term.courses.forEach(course => {
         const status = getCourseStatus(course.code);
         
-        if (status === 'passed' || status === 'ongoing') {
-          if (index > highestActiveIndex) highestActiveIndex = index;
+        // If they have ANY record (even 'failed'), we know they reached this semester
+        if (status) {
+          if (index > currentActiveIndex && index <= maxAllowedIndex) {
+            currentActiveIndex = index;
+          }
           if (status === 'ongoing') hasAnyOngoing = true;
         }
 
@@ -95,45 +112,28 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
       });
     });
 
-    // 🚨 THE FIX: Perfectly synced Target Term Finder
-    let targetIndex = -1;
-    let seasonKeyword = upcomingTerm === "Summer" ? "Summer" : "1st Semester"; 
+    // Determine target keyword based on UI Dropdown
+    // 🚨 FIX 1: Find the exact Target Array Index (No more text-keyword guessing!)
+    let targetIndex = currentActiveIndex === -1 ? 0 : currentActiveIndex + 1;
 
-    if (highestActiveIndex === -1) {
-      if (upcomingTerm === "Summer") {
-        targetIndex = curriculum.findIndex(t => t.semester.includes("Summer"));
-        seasonKeyword = "Summer";
-      } else {
-        targetIndex = 0; 
-        seasonKeyword = "1st Semester";
-      }
-    } else {
-      for (let i = highestActiveIndex + 1; i < curriculum.length; i++) {
-        const isSummerBlock = curriculum[i].semester.includes("Summer");
-        
-        if (upcomingTerm === "Summer" && isSummerBlock) {
-          targetIndex = i;
-          seasonKeyword = "Summer";
-          break;
-        } else if (upcomingTerm === "Next Semester" && !isSummerBlock) {
-          targetIndex = i;
-          if (curriculum[i].semester.includes("1st Semester")) seasonKeyword = "1st Semester";
-          if (curriculum[i].semester.includes("2nd Semester")) seasonKeyword = "2nd Semester";
-          break;
-        }
-      }
+    // Keep it within bounds
+    if (targetIndex >= curriculum.length) {
+      targetIndex = curriculum.length - 1;
     }
 
-    if (totalUnfinishedCourses === 0 && !hasAnyOngoing && targetIndex < 7) {
-      targetIndex = 7;
-      seasonKeyword = "2nd Semester";
-    } else if (targetIndex === -1) {
-      targetIndex = highestActiveIndex > -1 ? highestActiveIndex : 0;
+    // Handle "Summer" vs "Next Semester" strictly by skipping or finding blocks
+    if (upcomingTerm === "Summer") {
+      const nextSummer = curriculum.findIndex((t, i) => i >= currentActiveIndex && t.semester.includes("Summer"));
+      if (nextSummer !== -1) targetIndex = nextSummer;
+    } 
+    else if (upcomingTerm === "Next Semester" && curriculum[targetIndex].semester.includes("Summer")) {
+      // If they want a regular semester but the next block is Summer, skip over the Summer block
+      if (targetIndex + 1 < curriculum.length) targetIndex += 1;
     }
 
     let tempCourseStates = {};
     
-    // --- PASS 1: Strict Prerequisite Evaluation ---
+    // --- PASS 1: Prerequisite Evaluation ---
     curriculum.forEach((term, termIndex) => {
       term.courses.forEach(course => {
         const currentStatus = getCourseStatus(course.code);
@@ -147,9 +147,8 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
           const prereqList = course.prereq.split(',').map(p => normalize(p));
           
           for (let prereqCode of prereqList) {
-            
             if (prereqCode.includes("YEAR")) {
-              const requiredYear = parseInt(prereqCode); 
+              const requiredYear = parseInt(prereqCode.replace(/\D/g, '')); 
               if (studentYear < requiredYear) {
                 if (hasAnyOngoing && (studentYear + 1 >= requiredYear)) {
                   isAssumed = true;
@@ -175,7 +174,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
                 isAssumed = true; 
               } else {
                 prereqsMet = false; 
-                missingReasons.push(prereqCode);
+                missingReasons.push(course.prereq.split(',').find(p => normalize(p) === prereqCode) || prereqCode);
               }
             }
           }
@@ -192,7 +191,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
           name: course.title,
           semesterLabel: term.semester,
           termIndex: termIndex,
-          units: `${course.units} Units`,
+          units: `${course.units}`,
           unlockState: finalState,
           missingReasons: missingReasons,
           coreq: course.coreq
@@ -212,7 +211,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
           const coreqDbStatus = getCourseStatus(coreqCode);
 
           if (coreqDbStatus === 'passed') {
-            // Coreq is already finished
+            // Good
           } else if (coreqDbStatus === 'ongoing') {
             courseObj.unlockState = 'Assumed';
           } else {
@@ -228,18 +227,18 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
       }
     });
 
-    // 🚨 THE FIX: Final UI Filter matching FutureCourses exactly
+    // 🚨 FIX 2: THE ULTIMATE UI FILTER 
+    // Mathematically isolates the exact array index (zero text guessing!)
     const processedCourses = Object.values(tempCourseStates);
 
     const finalLockedCourses = processedCourses
       .filter(course => 
         course.unlockState === 'Locked' && 
-        course.termIndex <= targetIndex && 
-        course.semesterLabel.includes(seasonKeyword) // This strictly isolates the correct semester!
+        course.termIndex === targetIndex 
       )
       .map(course => ({
         ...course,
-        semester: course.semesterLabel, // Mapping for your specific UI
+        semester: course.semesterLabel, 
         missingPrereq: course.missingReasons.join(', ')
       }));
 
