@@ -18,14 +18,28 @@ export const VerifyStudentModal = ({ student, onClose }) => {
     };
   }, [student.courses]);
 
+  // 1. REPLACE your getCourseDescription function with this robust version:
   const getCourseDescription = (courseCode) => {
+    if (!courseCode) return null;
+    
+    // Normalize by stripping spaces and standardizing case
+    const normalizedCode = courseCode.toString().toUpperCase().replace(/\s+/g, '');
+    
+    // Handle petition codes that might have "01" appended to the base code
+    const baseCode = normalizedCode.endsWith('01') ? normalizedCode.slice(0, -2) : normalizedCode;
+
     for (let term of curriculum) {
-      const foundCourse = term.courses.find(c => c.code === courseCode);
+      const foundCourse = term.courses.find(c => {
+        const currCode = c.code.toString().toUpperCase().replace(/\s+/g, '');
+        // Check for both the exact code and the base code (without '01')
+        return currCode === normalizedCode || currCode === baseCode;
+      });
+      
       if (foundCourse) {
         return foundCourse.title || foundCourse.name;
       }
     }
-    return "Description not found";
+    return null;
   };
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -85,9 +99,9 @@ export const VerifyStudentModal = ({ student, onClose }) => {
                         {course.code}
                       </div>
                       
-                      {/* Course Description (Uses DB data, or safely falls back to Curriculum Data) */}
+                      {/* 2. REPLACE the Course Description div inside your map with this: */}
                       <div className="text-gray-500 text-xs italic line-clamp-2 mt-1">
-                        {course.title || course.name || getCourseDescription(course.code)}
+                        {getCourseDescription(course.code) || course.title || course.name || "Description not found"}
                       </div>
                     </div>
                     

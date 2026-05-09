@@ -4,6 +4,10 @@ import { curriculum } from '../data/curriculumData';
 
 export const AcademicHistory = () => {
   const [userRecords, setUserRecords] = useState([]);
+  
+  // New States for the Toggles
+  const [activeYear, setActiveYear] = useState('1st Year');
+  const [activeSemester, setActiveSemester] = useState('1st Semester');
 
   // FETCH: Get the student's actual grades from PostgreSQL
   useEffect(() => {
@@ -26,13 +30,10 @@ export const AcademicHistory = () => {
             }
             
             const current = courseMap.get(id);
-            
-            // 🚨 THE FIX: Directly read the base status AND the new boolean flag
             current.status = record.status; 
             current.isPetitioned = record.is_petitioned === true;
           });
 
-          // Save the mapped data to our React state
           setUserRecords(Array.from(courseMap.values()));
         }
       } catch (error) {
@@ -65,89 +66,160 @@ export const AcademicHistory = () => {
     }
 
     return (
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex items-center flex-nowrap whitespace-nowrap gap-2">
         {baseBadge}
         {isPetitioned && (
-          <span className="px-2.5 py-1 bg-purple-100 text-purple-700 border border-purple-200 rounded-md text-xs font-bold tracking-wide uppercase shrink-0">
-            ★ Petition
+          <span 
+            title="Petitioned Course"
+            className="w-5 h-5 flex items-center justify-center bg-purple-100 text-purple-700 border border-purple-200 rounded-full text-[10px] font-bold shrink-0"
+          >
+            ★
           </span>
         )}
       </div>
     );
   };
 
+  // 🚨 DYNAMIC TOGGLE LOGIC
+  const handleYearChange = (year) => {
+    setActiveYear(year);
+    setActiveSemester('1st Semester'); // Reset to 1st sem when switching years
+  };
+
+  // 1. Filter curriculum down to just the active year
+  const termsInActiveYear = curriculum.filter(t => t.semester.includes(activeYear));
+  
+  // 2. Check if this specific year has a Summer term in the database
+  const hasSummer = termsInActiveYear.some(t => t.semester.includes('Summer'));
+  
+  // 3. Build the semester options array
+  const availableSemesters = ['1st Semester', '2nd Semester'];
+  if (hasSummer) availableSemesters.push('Summer');
+
+  // 4. Find the exact term to display right now
+  const displayedTerm = termsInActiveYear.find(t => t.semester.includes(activeSemester));
+
   return (
     <main className="flex flex-col w-full min-h-screen bg-[#F4F7FA] font-sans pb-16">
-      
       <StudentDashboardHeaderSection />
       
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[58px] mt-8 flex flex-col gap-6">
+      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[58px] mt-10 flex flex-col gap-10">
         
+        {/* PAGE TITLE */}
         <div className="w-full flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-[#003366] text-2xl lg:text-3xl font-bold font-['Calistoga'] leading-tight m-0">
+            <h1 className="text-[#003366] text-[32px] lg:text-[40px] font-bold font-['Calistoga'] leading-tight m-0">
               Academic History
             </h1>
-            <span className="text-2xl animate-bounce">📚</span>
+            <span className="text-3xl animate-bounce">📚</span>
           </div>
-          <p className="text-[#003366]/70 text-sm lg:text-base font-medium font-['Inter'] m-0">
-            Review your past courses, grades, and completed units.
-          </p>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4 mt-1">
+            <p className="text-[#003366]/70 text-[16px] lg:text-[18px] italic font-['Calistoga'] m-0">
+              Review your past courses, requirements, and completed units.
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {curriculum.map((term, index) => (
-            <div key={index} className="w-full bg-white rounded-2xl border border-black/10 p-5 lg:p-6 shadow-sm overflow-hidden flex flex-col gap-4">
-              
-              <h2 className="text-[#003366] text-xl font-bold font-['Calistoga'] border-b-2 border-gray-100 pb-3">
-                {term.semester}
-              </h2>
+        {/* TOGGLES SECTION */}
+        <div className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-2 w-full">
+          
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[600px]">
-                  <thead>
-                    <tr className="border-b-2 border-[#003366]/20">
-                      <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[20%]">Course Code</th>
-                      <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[45%]">Descriptive Title</th>
-                      <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[15%]">Units</th>
-                      <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[20%]">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {term.courses.map((course, idx) => {
-                      
-                      // Look for this exact course in the merged user records
-                      const savedRecord = userRecords.find(record => record.id === course.id);
-                      
-                      const currentStatus = savedRecord && savedRecord.status !== 'pending' ? savedRecord.status : "pending";
-                      const isPetitioned = savedRecord ? savedRecord.isPetitioned : false;
+          {/* YEAR TOGGLE (Right Side) */}
+          <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
+            {['1st Year', '2nd Year', '3rd Year', '4th Year'].map((year) => (
+              <button
+                key={year}
+                onClick={() => handleYearChange(year)}
+                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                  activeYear === year ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+          
+          {/* SEMESTER TOGGLE (Left Side) */}
+          <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
+            {availableSemesters.map((sem) => (
+              <button
+                key={sem}
+                onClick={() => setActiveSemester(sem)}
+                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                  activeSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
+                }`}
+              >
+                {sem}
+              </button>
+            ))}
+          </div>
 
-                      return (
-                        <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                          <td className="py-2.5 px-4 text-black font-bold font-['Inter'] text-sm lg:text-base whitespace-nowrap">
-                            {course.code}
-                          </td>
-                          <td className="py-2.5 px-4 text-black/80 font-medium font-['Inter'] text-sm lg:text-base">
-                            {course.title}
-                          </td>
-                          <td className="py-2.5 px-4 text-[#003366] font-bold font-['Inter'] text-sm lg:text-base">
-                            {course.units}
-                          </td>
-                          <td className="py-2.5 px-4">
-                            {renderBadges(currentStatus, isPetitioned)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          
+
+        </div>
+
+        {/* TABLE SECTION */}
+          <div className="flex flex-col gap-2">
+            {displayedTerm ? (
+              <div className="w-full bg-white rounded-2xl border border-black/10 p-5 lg:p-6 shadow-sm overflow-hidden flex flex-col gap-4">
+                <h2 className="text-[#003366] text-xl font-bold font-['Calistoga'] border-b-2 border-gray-100 pb-3">
+                  {displayedTerm.semester}
+                </h2>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                      <tr className="border-b-2 border-[#003366]/20">
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[15%]">Code</th>
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[30%]">Title</th>
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[15%]">Prerequisite</th>
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[15%]">Corequisite</th>
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[10%]">Units</th>
+                        <th className="py-2 px-4 text-[#003366] font-bold font-['Inter'] uppercase tracking-wider text-xs lg:text-sm w-[15%]">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayedTerm.courses.map((course, idx) => {
+                        const savedRecord = userRecords.find(record => record.id === course.id);
+                        const currentStatus = savedRecord && savedRecord.status !== 'pending' ? savedRecord.status : "pending";
+                        const isPetitioned = savedRecord ? savedRecord.isPetitioned : false;
+
+                        return (
+                          <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                            <td className="py-2.5 px-4 text-black font-bold font-['Inter'] text-sm lg:text-base whitespace-nowrap">
+                              {course.code}
+                            </td>
+                            <td className="py-2.5 px-4 text-black/80 font-medium font-['Inter'] text-sm lg:text-base">
+                              {course.title}
+                            </td>
+                            <td className="py-2.5 px-4 text-gray-600 font-medium font-['Inter'] text-xs lg:text-sm italic whitespace-nowrap">
+                              {course.prereq || 'None'}
+                            </td>
+                            <td className="py-2.5 px-4 text-gray-600 font-medium font-['Inter'] text-xs lg:text-sm italic whitespace-nowrap">
+                              {course.coreq || 'None'}
+                            </td>
+                            <td className="py-2.5 px-4 text-[#003366] font-bold font-['Inter'] text-sm lg:text-base">
+                              {course.units}
+                            </td>
+                            <td className="py-2.5 px-4">
+                              {renderBadges(currentStatus, isPetitioned)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-
-            </div>
-          ))}
+            ) : (
+              <div className="w-full bg-white rounded-3xl border border-black/10 p-10 text-center shadow-sm">
+                <p className="text-gray-500 font-medium font-['Inter']">
+                  No curriculum data found for {activeYear} - {activeSemester}.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-
-      </div>
     </main>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { curriculum } from '../../data/curriculumData'; 
+import { curriculum } from '../../data/curriculumData';
+
 
 export const FutureCoursesSection = () => {
   const [eligibleCourses, setEligibleCourses] = useState([]);
@@ -8,7 +9,8 @@ export const FutureCoursesSection = () => {
   const [studentYear, setStudentYear] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
-  const normalize = (str) => str ? str.toString().trim().toUpperCase() : "";
+  // 🚨 THE FIX 1: Re-added the Space Stripper so "CPE 111" perfectly matches "CPE111"
+  const normalize = (str) => str ? str.toString().trim().toUpperCase().replace(/\s+/g, '') : "";
 
   // 1. FETCH DATA & AUTO-DETECT TERM
   useEffect(() => {
@@ -30,7 +32,15 @@ export const FutureCoursesSection = () => {
           let highestIndex = -1;
           curriculum.forEach((term, index) => {
             term.courses.forEach(course => {
-              const record = freshRecords.find(r => normalize(r.code) === normalize(course.code));
+              // Quick check using the dual-lookup logic for the auto-scroller
+              const baseCode = normalize(course.code);
+              const petitionCode = baseCode + "01";
+              
+              const record = freshRecords.find(r => {
+                const rCode = normalize(r.code);
+                return rCode === baseCode || rCode === petitionCode;
+              });
+
               if (record && (record.status === 'passed' || record.status === 'ongoing')) {
                 if (index > highestIndex) highestIndex = index;
               }
@@ -60,14 +70,23 @@ export const FutureCoursesSection = () => {
   useEffect(() => {
     if (isLoading) return;
 
+    // 🚨 THE FIX 2: Dual-Lookup Engine
+    // This forces the scanner to treat "CPE 111 01" exactly the same as "CPE 111"
     const getCourseStatus = (courseCode) => {
-      const record = userRecords.find(r => normalize(r.code) === normalize(courseCode));
-      return record ? record.status : null; 
+      const baseCode = normalize(courseCode);
+      const petitionCode = baseCode + "01"; // Automatically targets the petitioned version
+
+      const record = userRecords.find(r => {
+        const recordCode = normalize(r.code);
+        return recordCode === baseCode || recordCode === petitionCode;
+      });
+      
+      return record ? record.status.toLowerCase() : null; 
     };
 
     let highestActiveIndex = -1;
     let hasAnyOngoing = false;
-    let totalUnfinishedCourses = 0; // Tracks if the student has "No Subjects Behind"
+    let totalUnfinishedCourses = 0; 
 
     // Map out where the student currently is in the curriculum
     curriculum.forEach((term, index) => {
@@ -79,8 +98,6 @@ export const FutureCoursesSection = () => {
           if (status === 'ongoing') hasAnyOngoing = true;
         }
 
-        // Count unfinished courses (anything not explicitly 'passed')
-        // We exclude the final OJT block (index 7) from this count.
         if (index < 7 && status !== 'passed') {
            totalUnfinishedCourses++;
         }
@@ -109,7 +126,6 @@ export const FutureCoursesSection = () => {
           break;
         } else if (upcomingTerm === "Next Semester" && !isSummerBlock) {
           targetIndex = i;
-          // Handle specific semester keywords
           if (curriculum[i].semester.includes("1st Semester")) seasonKeyword = "1st Semester";
           if (curriculum[i].semester.includes("2nd Semester")) seasonKeyword = "2nd Semester";
           break;
@@ -117,8 +133,6 @@ export const FutureCoursesSection = () => {
       }
     }
 
-    // THE OJT FIX: If the target index somehow didn't catch the final block, 
-    // but the student has no subjects behind, force the target index to the final block.
     if (totalUnfinishedCourses === 0 && !hasAnyOngoing && targetIndex < 7) {
       targetIndex = 7;
       seasonKeyword = "2nd Semester";
@@ -141,9 +155,8 @@ export const FutureCoursesSection = () => {
           const prereqList = course.prereq.split(',').map(p => normalize(p));
           
           for (let prereqCode of prereqList) {
-            
             if (prereqCode.includes("YEAR")) {
-              const requiredYear = parseInt(prereqCode); 
+              const requiredYear = parseInt(prereqCode.replace(/\D/g, '')); 
               if (studentYear < requiredYear) {
                 if (hasAnyOngoing && (studentYear + 1 >= requiredYear)) {
                   isAssumed = true;
@@ -152,16 +165,13 @@ export const FutureCoursesSection = () => {
                 }
               }
             } 
-            // 🚨 THE CRITICAL OJT FIX: Handling "No Subjects Behind"
             else if (prereqCode.includes("BEHIND")) {
-               // If there is even a single course not passed (or if they are currently ongoing), OJT is locked.
                if (totalUnfinishedCourses > 0) {
                  prereqsMet = false;
                } else if (hasAnyOngoing) {
                  isAssumed = true;
                }
             }
-            // Normal code check
             else {
               const prereqStatus = getCourseStatus(prereqCode);
 
@@ -304,6 +314,8 @@ export const FutureCoursesSection = () => {
           ))}
         </div>
       )}
+
+      
     </section>
   );
 }; 

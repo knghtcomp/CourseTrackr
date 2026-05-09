@@ -31,13 +31,23 @@ export const WelcomeMessageSection = ({ showSetupReminder = true }) => {
         </div>
       </div>
 
-      {/* RIGHT SIDE: Compact Setup Reminder with Yellow Background */}
+      {/* RIGHT SIDE: Compact Setup Reminder (Premium Vibrant UI) */}
       {showSetupReminder && (
-        <div className="flex items-center gap-3 lg:gap-4 bg-[#FFCC00] p-2 pr-2 lg:p-3 lg:pr-3 rounded-2xl lg:rounded-[20px] shadow-sm shrink-0">
+        <div className="group flex items-center gap-3 lg:gap-4 bg-gradient-to-br from-[#FFD700] via-[#FFCC00] to-[#FFB800] p-2 pr-2 lg:p-2.5 lg:pr-2.5 rounded-2xl lg:rounded-[20px] shadow-[0_4px_20px_-4px_rgba(255,204,0,0.6)] border border-yellow-300/50 shrink-0 relative overflow-hidden transition-all duration-300 hover:shadow-[0_8px_25px_-5px_rgba(255,204,0,0.8)] hover:-translate-y-0.5 cursor-pointer">
           
-          {/* ICON BOX */}
-          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#003366] rounded-xl flex items-center justify-center shrink-0 shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 lg:h-6 lg:w-6 text-[#FFCC00]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          {/* Subtle animated shine effect sweeping across the background on hover */}
+          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:translate-x-full transition-transform duration-1000 skew-x-12 ease-in-out"></div>
+
+          {/* ICON BOX - Premium Dark Glass */}
+          <div className="relative w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-b from-[#001A33] to-[#003366] rounded-xl flex items-center justify-center shrink-0 shadow-[inset_0_2px_4px_rgba(255,255,255,0.15)] border border-[#004080] z-10">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 lg:h-6 lg:w-6 text-[#FFCC00] drop-shadow-[0_0_6px_rgba(255,204,0,0.8)] transition-transform duration-700 ease-out group-hover:rotate-180" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -46,9 +56,9 @@ export const WelcomeMessageSection = ({ showSetupReminder = true }) => {
           {/* ACTION BUTTON */}
           <button 
             onClick={() => navigate('/setup')} 
-            className="bg-[#003366] text-white px-5 py-2.5 lg:px-6 lg:py-3 rounded-xl font-['Calistoga'] text-sm lg:text-base hover:bg-[#002244] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+            className="relative z-10 bg-[#001A33] text-white px-5 py-2.5 lg:px-6 lg:py-3 rounded-xl font-['Calistoga'] text-sm lg:text-base tracking-wide border border-[#001A33] hover:bg-[#001A33] hover:border-white/20 hover:shadow-[0_0_15px_rgba(0,26,51,0.5)] transition-all duration-300 whitespace-nowrap overflow-hidden"
           >
-            Complete SetUp Now
+            <span className="relative z-10 drop-shadow-md">Complete Setup Now</span>
           </button>
           
         </div>

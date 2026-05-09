@@ -3,7 +3,7 @@ import React from 'react';
 import { StudentDashboardHeaderSection } from "../dashboard/StudentDashboardHeaderSection"; 
 
 import { FutureCoursesSection } from "./FutureCoursesSection";
-import { LockedCoursesSection } from "./LockedCoursesSection";
+import { LockedCoursesSection } from "./LockedCoursesSection"
 
 export const Tracker = () => {
   // Get current date to match the Dashboard design
@@ -23,18 +23,16 @@ export const Tracker = () => {
         <div className="w-full flex flex-col gap-1">
           {/* TITLE LINE */}
           <div className="flex items-center gap-3">
-            {/* THE TEXT FIX: Updated to "Course Suggestions" */}
             <h1 className="text-[#003366] text-[32px] lg:text-[40px] font-bold font-['Calistoga'] leading-tight m-0">
-              Course Suggestions
+              Academic Tracker
             </h1>
-            <span className="text-3xl animate-bounce">🎯</span>
+            <span className="text-3xl animate-bounce">🗺️</span>
           </div>
 
           {/* SUBTEXT (No date, no vertical line) */}
           <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4 mt-1">
-            {/* THE TEXT FIX: Updated the subtext */}
             <p className="text-[#003366]/70 text-[16px] lg:text-[18px] italic font-['Calistoga'] m-0">
-              Based on your standing, here are your next available subjects.
+              Map out your curriculum, check prerequisites, and plan your next move.
             </p>
           </div>
         </div>

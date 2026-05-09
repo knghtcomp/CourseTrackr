@@ -3,13 +3,11 @@ import { curriculum } from '../../data/curriculumData';
 
 export const EditCoursesModal = ({ student, onClose }) => {
   const [courseStatuses, setCourseStatuses] = useState({});
-  // 🚨 NEW: State specifically for tracking petitions
   const [petitionStatuses, setPetitionStatuses] = useState({});
   
   const [dbCourses, setDbCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // State to track selected Year and Semester
   const [selectedYear, setSelectedYear] = useState(
     Number(student.yearLevel || student.year_standing || 1)
   );
@@ -17,7 +15,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
 
   const normalize = (str) => str ? str.toString().trim().toUpperCase() : "";
 
-  // 1. Fetch data on load (UPDATED FOR DUAL RECORDS)
+  // 1. FETCH DATA (Fixed to properly read is_petitioned flags)
   useEffect(() => {
     const fetchModalData = async () => {
       if (!student || !student.id) return;
@@ -34,12 +32,15 @@ export const EditCoursesModal = ({ student, onClose }) => {
         const initialStatuses = {};
         const initialPetitions = {};
 
-        // 🚨 THE FIX: Separate the base status and the petition status
         recordsData.forEach(record => {
           const id = Number(record.id || record.course_id);
-          if (record.status === 'petitioned') {
+          
+          // Fix: Check the boolean flag for petitions
+          if (record.is_petitioned === true || record.status === 'petitioned') {
             initialPetitions[id] = true;
-          } else if (record.status === 'passed' || record.status === 'ongoing') {
+          } 
+          
+          if (record.status === 'passed' || record.status === 'ongoing') {
             initialStatuses[id] = record.status;
           }
         });
@@ -78,7 +79,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
     return null;
   };
 
-  // 2. THE TRI-STATE TOGGLE ENGINE (Unchanged, handles Enrolled/Passed/Pending)
+  // 2. COURSE STATUS TOGGLE
   const handleToggleCourse = (code) => {
     const dbId = getDbIdByCode(code);
     
@@ -153,36 +154,40 @@ export const EditCoursesModal = ({ student, onClose }) => {
     });
   };
 
-  // 🚨 NEW: TOGGLE PETITION LOGIC
+  // PETITION TOGGLE
   const handleTogglePetition = (e, code) => {
-    e.stopPropagation(); // Stop the card's onClick from firing
+    e.stopPropagation(); 
 
     const dbId = getDbIdByCode(code);
     if (!dbId) return;
 
-    // Only allow petition toggling if the course is already Enrolled or Completed
-    if (courseStatuses[dbId]) {
-      setPetitionStatuses(prev => ({
-        ...prev,
-        [dbId]: !prev[dbId]
-      }));
-    }
+    setPetitionStatuses(prev => {
+      const newPetitions = { ...prev };
+      if (newPetitions[dbId]) {
+        delete newPetitions[dbId];
+      } else {
+        newPetitions[dbId] = true;
+      }
+      return newPetitions;
+    });
   };
 
-  // 3. SAVE LOGIC (UPDATED FOR DUAL RECORDS)
+  // 3. SAVE LOGIC (Fixed to properly save Petitions)
   const handleSaveCourses = async () => {
     try {
-      const recordsToSave = [];
-      
-      Object.keys(courseStatuses).forEach(idStr => {
+      // Collect ALL unique IDs that have either a course status OR a petition status
+      const allInteractedIds = new Set([
+        ...Object.keys(courseStatuses),
+        ...Object.keys(petitionStatuses)
+      ]);
+
+      const recordsToSave = Array.from(allInteractedIds).map(idStr => {
         const id = Number(idStr);
-        // 1. Save base status (passed/ongoing)
-        recordsToSave.push({ course_id: id, status: courseStatuses[id] });
-        
-        // 2. Save petition status if it exists AND the course isn't pending
-        if (petitionStatuses[id]) {
-          recordsToSave.push({ course_id: id, status: 'petitioned' });
-        }
+        return {
+          course_id: id,
+          status: courseStatuses[id] || 'pending', // Defaults to pending if only petitioned
+          is_petitioned: !!petitionStatuses[id]    // Sends true/false flag to backend
+        };
       });
 
       const response = await fetch('http://localhost:5000/api/records', {
@@ -205,7 +210,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
     }
   };
 
-  // 🚨 SMART FILTER LOGIC
+  // SMART FILTER LOGIC
   const filteredCurriculum = curriculum.filter(term => {
     const semStr = term.semester.toLowerCase();
     
@@ -236,13 +241,13 @@ export const EditCoursesModal = ({ student, onClose }) => {
         
         {/* Modal Header */}
         <div className="p-6 lg:p-8 border-b border-gray-100 flex justify-between items-start shrink-0 bg-white">
-          <div>
+          <div className="flex-1 pr-6">
             <h2 className="text-[#003366] text-2xl font-bold font-['Calistoga'] m-0">Edit Student Academic Record</h2>
             <p className="text-gray-500 font-medium font-['Inter'] mt-1">
               {student.name} ({student.studentId || student.school_id}) - Year {student.yearLevel || student.year_standing}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors text-2xl">
+          <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors text-2xl shrink-0">
             ✕
           </button>
         </div>
@@ -382,17 +387,14 @@ export const EditCoursesModal = ({ student, onClose }) => {
                                 {course.title}
                               </div>
                               
-                              {/* 🚨 THE PETITION BUTTON */}
+                              {/* PETITION BUTTON (Unlocked) */}
                               <div className="mt-3 flex justify-start">
                                 <button
                                   onClick={(e) => handleTogglePetition(e, course.code)}
-                                  disabled={!status} // Disabled if course is pending
                                   className={`px-3 py-1.5 text-[10px] font-bold rounded-full border transition-all ${
-                                    !status 
-                                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60'
-                                      : isPetitioned 
-                                        ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700 shadow-sm' 
-                                        : 'bg-white text-purple-600 border-purple-200 hover:border-purple-600 hover:bg-purple-50 shadow-sm'
+                                    isPetitioned 
+                                      ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700 shadow-sm' 
+                                      : 'bg-white text-purple-600 border-purple-200 hover:border-purple-600 hover:bg-purple-50 shadow-sm'
                                   }`}
                                 >
                                   {isPetitioned ? '★ Petitioned' : '+ Petition'}
