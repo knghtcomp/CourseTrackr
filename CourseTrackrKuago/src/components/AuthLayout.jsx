@@ -2,6 +2,7 @@ import React from 'react';
 
 export const AuthLayout = ({ children }) => {
   return (
+    
     <div className="flex w-full min-h-screen bg-white font-sans">
       
       {/* THE FIX: Removed 'sticky top-0 h-screen' so this panel scrolls naturally with the page */}

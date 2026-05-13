@@ -3,7 +3,6 @@ import React from 'react';
 import { StudentDashboardHeaderSection } from "../dashboard/StudentDashboardHeaderSection"; 
 
 import { FutureCoursesSection } from "./FutureCoursesSection";
-import { LockedCoursesSection } from "./LockedCoursesSection"
 
 export const Tracker = () => {
   // Get current date to match the Dashboard design
@@ -40,7 +39,6 @@ export const Tracker = () => {
         {/* THE THREE IMPORTED SECTIONS */}
 
         <FutureCoursesSection />
-        <LockedCoursesSection />
 
       </div>
     </main>

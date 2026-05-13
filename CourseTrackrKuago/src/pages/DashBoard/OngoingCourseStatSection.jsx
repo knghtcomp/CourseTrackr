@@ -25,8 +25,8 @@ export const OngoingCoursesStatsSection = () => {
     <div className="w-full bg-white/60 rounded-3xl border border-black/30 px-6 py-4 flex items-center justify-between shadow-sm min-h-[88px]">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-[#F97316] rounded-md flex items-center justify-center shrink-0 shadow-inner">
-            <img src="/clock.svg" alt="" className="w-4 h-4 brightness-0 invert" />
+          <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 shadow-inner">
+            <img src="/clock.svg" alt="" className="w-4 h-4 " />
           </div>
           <p className="text-black/80 text-xs font-bold font-['Calistoga'] uppercase tracking-wider">
             Enrolled Courses

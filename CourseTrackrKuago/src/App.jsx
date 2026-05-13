@@ -9,7 +9,8 @@ import AcademicHistory  from './pages/AcademicHistory';
 import Setup from './pages/Setup';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import ResetPassword  from './pages/ResetPassword'; // Adjust path as needed
-
+import {AboutUs} from './components/AboutUs'; // Adjust the path if they are in a different folder
+import {PrivacyPolicy}  from './components/PrivacyPolicy';
 // Inside your <Routes> block, add this:
 
 
@@ -28,6 +29,8 @@ function App() {
         <Route path="/setup" element={<Setup />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

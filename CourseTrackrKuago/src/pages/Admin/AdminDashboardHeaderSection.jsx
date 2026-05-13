@@ -46,7 +46,10 @@ const AdminDashboardHeaderSection = () => {
   };
 
   return (
-    <header className="w-full h-[90px] bg-[#003366] flex items-center relative shadow-lg z-50">
+    <header 
+      className="w-full h-[90px] flex items-center relative shadow-lg z-50 shrink-0"
+      style={{ background: 'linear-gradient(to right, #001A33, #004080)' }}
+    >
       <div className="w-full max-w-[1440px] mx-auto flex items-center px-4 lg:px-6 h-full">
         
         {/* GROUP 1: Branding + Navigation Links */}

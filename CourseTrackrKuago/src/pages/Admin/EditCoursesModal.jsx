@@ -263,70 +263,52 @@ export const EditCoursesModal = ({ student, onClose }) => {
           ) : (
             <>
               {/* THE HORIZONTAL TOGGLE UI */}
+              {/* THE HORIZONTAL TOGGLE UI */}
               <div className="flex flex-col gap-4 mb-6">
                 
                 <p className="text-gray-600 font-medium text-sm md:text-base m-0">
                   Click a course to cycle its status: <strong className="text-[#10B981]">Completed</strong> → <strong className="text-[#F59E0B]">Enrolled</strong> → <strong>Pending</strong>.
                 </p>
                 
-                <div className="flex flex-wrap items-center gap-3 lg:gap-4">
+                <div className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
                   
-                  {/* Year Toggle */}
-                  <div className="flex gap-1 p-1.5 bg-gray-200/50 rounded-xl w-max">
-                    {[1, 2, 3, 4].map(year => (
+
+
+                  {/* YEAR TOGGLE (Right Side) */}
+                  <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
+                    {[1, 2, 3, 4].map((year) => {
+                      const yearLabel = year === 1 ? '1st Year' : year === 2 ? '2nd Year' : year === 3 ? '3rd Year' : '4th Year';
+                      return (
+                        <button
+                          key={year}
+                          onClick={() => handleYearChange(year)}
+                          className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                            selectedYear === year ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
+                          }`}
+                        >
+                          {yearLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* SEMESTER TOGGLE (Left Side) */}
+                  <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
+                    {['1st', '2nd', ...(selectedYear === 2 ? ['Summer'] : [])].map((sem) => (
                       <button
-                        key={year}
-                        onClick={() => handleYearChange(year)}
-                        className={`px-4 py-2 rounded-lg font-bold font-['Inter'] text-sm transition-all ${
-                          selectedYear === year
-                            ? 'bg-white text-[#003366] shadow-sm'
-                            : 'text-gray-500 hover:text-[#003366]'
+                        key={sem}
+                        onClick={() => setSelectedSemester(sem)}
+                        className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                          selectedSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                         }`}
                       >
-                        Year {year}
+                        {sem === 'Summer' ? 'Summer' : `${sem} Sem`}
                       </button>
                     ))}
                   </div>
 
-                  {/* Semester Toggle */}
-                  <div className="flex gap-1 p-1.5 bg-gray-200/50 rounded-xl w-max">
-                    <button
-                      onClick={() => setSelectedSemester('1st')}
-                      className={`px-4 py-2 rounded-lg font-bold font-['Inter'] text-sm transition-all ${
-                        selectedSemester === '1st'
-                          ? 'bg-white text-[#003366] shadow-sm'
-                          : 'text-gray-500 hover:text-[#003366]'
-                      }`}
-                    >
-                      1st Sem
-                    </button>
-                    
-                    <button
-                      onClick={() => setSelectedSemester('2nd')}
-                      className={`px-4 py-2 rounded-lg font-bold font-['Inter'] text-sm transition-all ${
-                        selectedSemester === '2nd'
-                          ? 'bg-white text-[#003366] shadow-sm'
-                          : 'text-gray-500 hover:text-[#003366]'
-                      }`}
-                    >
-                      2nd Sem
-                    </button>
+                  
 
-                    {selectedYear === 2 && (
-                      <button
-                        onClick={() => setSelectedSemester('Summer')}
-                        className={`px-4 py-2 rounded-lg font-bold font-['Inter'] text-sm transition-all ${
-                          selectedSemester === 'Summer'
-                            ? 'bg-white text-[#F59E0B] shadow-sm'
-                            : 'text-gray-500 hover:text-[#F59E0B]'
-                        }`}
-                      >
-                        Summer
-                      </button>
-                    )}
-                  </div>
                 </div>
-                
               </div>
 
               {/* Course Grid */}

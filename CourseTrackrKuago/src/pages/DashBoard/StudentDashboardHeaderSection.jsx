@@ -46,8 +46,7 @@ export const StudentDashboardHeaderSection = () => {
 
   return (
     <header 
-      className="w-full h-[90px] flex items-center relative shadow-lg z-[100] shrink-0"
-      style={{ background: 'linear-gradient(to bottom, #001A33, #004080)' }}
+      className="w-full h-[90px] flex items-center relative shadow-lg z-[100] shrink-0 bg-gradient-to-r from-[#001A33] to-[#004080]"
     >
       <div className="w-full max-w-[1440px] mx-auto flex items-center px-4 lg:px-6 h-full">
         
@@ -140,6 +139,23 @@ export const StudentDashboardHeaderSection = () => {
           </div>
 
         </div>
+        
+        {/* Text Links (About, Privacy) */}
+          <div className="hidden xl:flex items-center gap-6 ml-6 border-l border-white/20 pl-6">
+            <button 
+              onClick={() => navigate('/about')}
+              className="text-gray-300 hover:text-white text-sm font-semibold font-['Inter'] transition-colors"
+            >
+              About Us
+            </button>
+            <button 
+              onClick={() => navigate('/privacy')}
+              className="text-gray-300 hover:text-white text-sm font-semibold font-['Inter'] transition-colors"
+            >
+              Privacy Policy
+            </button>
+          </div>
+
 
         {/* GROUP 2: USER INFO & LOGOUT (Pinned to right edge) */}
         <div className="ml-auto flex items-center gap-4 lg:gap-6">
@@ -173,6 +189,7 @@ export const StudentDashboardHeaderSection = () => {
             </button>
           </div>
           
+
         </div>
 
       </div>

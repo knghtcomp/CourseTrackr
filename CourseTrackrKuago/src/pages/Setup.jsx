@@ -282,6 +282,7 @@ export const Setup = () => {
               Select your current academic level to help us personalize your track.
             </p>
           </div>
+
           <div className="relative w-full lg:w-48">
             <select
               value={yearStanding}
@@ -307,38 +308,40 @@ export const Setup = () => {
         </section>
 
         {/* 3. Toggles for Curriculum Navigation */}
-        <section className="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
-          <div className="flex p-1.5 bg-gray-100/80 rounded-2xl w-full md:w-auto border border-gray-200/60">
+        <section className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
+          
+          {/* YEAR TOGGLE (Right Side) */}
+          <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
             {[1, 2, 3, 4].map(y => (
               <button
                 key={y}
                 onClick={() => handleYearTabClick(y)}
-                className={`flex-1 md:flex-none px-4 md:px-8 py-2.5 rounded-xl font-bold font-['Inter'] text-sm transition-all duration-300 ${
-                  viewYear === y 
-                    ? 'bg-white text-[#003366] shadow-[0_2px_8px_rgba(0,0,0,0.08)]' 
-                    : 'text-gray-500 hover:text-gray-800'
+                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                  viewYear === y ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
-                Year {y}
+                {y === 1 ? '1st Year' : y === 2 ? '2nd Year' : y === 3 ? '3rd Year' : '4th Year'}
               </button>
             ))}
           </div>
-
-          <div className="flex p-1.5 bg-gray-100/80 rounded-2xl w-full md:w-auto border border-gray-200/60">
+          
+          {/* SEMESTER TOGGLE (Left Side) */}
+          <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
             {['1st Semester', '2nd Semester', ...(viewYear === 2 ? ['Summer'] : [])].map(sem => (
               <button
                 key={sem}
                 onClick={() => setViewSemester(sem)}
-                className={`flex-1 md:flex-none px-4 md:px-8 py-2.5 rounded-xl font-bold font-['Inter'] text-sm transition-all duration-300 ${
-                  viewSemester === sem 
-                    ? 'bg-white text-[#003366] shadow-[0_2px_8px_rgba(0,0,0,0.08)]' 
-                    : 'text-gray-500 hover:text-gray-800'
+                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                  viewSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
                 {sem}
               </button>
             ))}
           </div>
+
+          
+
         </section>
 
         {/* 4. Table Layout for Courses */}
