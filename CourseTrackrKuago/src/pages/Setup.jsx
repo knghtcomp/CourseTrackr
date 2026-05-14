@@ -81,6 +81,18 @@ export const Setup = () => {
     return sum + (matchedCourse ? matchedCourse.units : 0);
   }, 0);
 
+  // Calculate completed courses (status === 'passed')
+  const completedCoursesCount = selectedCourses.filter(c => c.status === 'passed').length;
+  
+  // Calculate total units ONLY for completed courses
+  const completedUnits = selectedCourses
+    .filter(c => c.status === 'passed')
+    .reduce((sum, selectedCourse) => {
+      const matchedCourse = curriculum.flatMap(sem => sem.courses).find(c => c.id === selectedCourse.id);
+      return sum + (matchedCourse ? matchedCourse.units : 0);
+    }, 0);
+  // Count ONLY the courses that are actively enrolled (ongoing)
+  const enrolledCoursesCount = selectedCourses.filter(course => course.status === 'ongoing').length;
   // 🚨 NEW: PREREQUISITE SCANNER HELPER
   const checkPrereqs = (prereqString) => {
     if (!prereqString || prereqString.toLowerCase() === 'none') return { met: true, missing: [] };
@@ -255,19 +267,18 @@ export const Setup = () => {
 
       <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[90px] mt-6 flex flex-col gap-6">
 
-        {/* 1. Shorter "Select Courses" Banner */}
         <section className="w-full bg-gradient-to-r from-[#001A33] to-[#004080] rounded-xl p-5 lg:p-6 flex flex-col md:flex-row items-center justify-between shadow-md text-center md:text-left">
           <div className="flex flex-col gap-1">
             <h2 className="text-white text-2xl lg:text-3xl font-normal font-['Calistoga'] m-0 drop-shadow-sm">
               Select Courses
             </h2>
             <p className="text-gray-200 text-base lg:text-lg font-light font-['Fjord'] m-0">
-              You have selected <strong className="text-[#FFCC00]">{totalCourses}</strong> courses totaling <strong className="text-[#FFCC00]">{totalUnits}</strong> units
+              You have completed <strong className="text-[#FFCC00]">{completedCoursesCount}</strong> courses totaling <strong className="text-[#FFCC00]">{completedUnits}</strong> units
             </p>
           </div>
           <div className="mt-4 md:mt-0 text-center">
             <span className="text-[#FFCC00] text-5xl lg:text-6xl font-extrabold font-['Inter'] leading-none drop-shadow-md">
-              {totalCourses}
+              {completedCoursesCount}
             </span>
           </div>
         </section>
@@ -445,7 +456,9 @@ export const Setup = () => {
         <div className="w-full max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-2 lg:px-[90px]">
           
           <div className="text-black/70 text-base lg:text-lg font-['Caladea']">
-            {totalCourses === 0 ? "No Course Selected Yet" : `${totalCourses} Courses Selected`} 
+            {enrolledCoursesCount === 0 
+              ? "0 Courses Currently Enrolled" 
+              : `${enrolledCoursesCount} Courses Currently Enrolled`} 
             <span className="hidden md:inline mx-2">|</span> 
             <span className="font-bold text-[#003366] block md:inline mt-1 md:mt-0">Standing: Year {yearStanding}</span>
           </div>

@@ -29,7 +29,7 @@ export const AboutUs = () => {
               About Us
             </h1>
             <p className="text-[#003366]/70 text-lg lg:text-xl italic font-['Calistoga'] mt-3">
-              Welcome to CourseTrackr, your ultimate academic compass.
+              Welcome to CourseTrackr, your academic management tool.
             </p>
           </div>
 

@@ -380,7 +380,7 @@ app.post('/api/petitions', async (req, res) => {
   }
 });
 
-// GET: Fetch all active petitions (Grouped for the Admin Dashboard)
+
 // GET: Fetch all active petitions (Grouped for the Admin Dashboard)
 app.get('/api/petitions', async (req, res) => {
   try {
@@ -417,7 +417,6 @@ app.get('/api/petitions', async (req, res) => {
   }
 });
 
-// POST: Approve a petition
 // POST: Complete/Approve a petition
 app.post('/api/petitions/:id/approve', async (req, res) => {
   const { studentId, courseId } = req.body;
@@ -477,12 +476,8 @@ app.put('/api/students/:id', async (req, res) => {
 });
 
 
-
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-
-
-
 
 app.use(cors());
 app.use(express.json());

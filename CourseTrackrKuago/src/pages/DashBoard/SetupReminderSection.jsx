@@ -46,7 +46,7 @@ export const SetupReminderSection = () => {
         onClick={() => navigate('/setup')} 
         className="shrink-0 w-full md:w-auto bg-[#FFCC00] text-[#001A33] px-6 py-3 lg:px-8 lg:py-4 rounded-2xl font-['Calistoga'] text-lg hover:bg-yellow-400 hover:shadow-[0_0_15px_rgba(255,204,0,0.4)] hover:-translate-y-0.5 transition-all duration-300 z-10"
       >
-        Complete Setup Now!!
+        Complete Setup Now
       </button>
 
     </div>

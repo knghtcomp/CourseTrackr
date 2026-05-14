@@ -4,7 +4,7 @@ export const curriculum = [
     courses: [
       { id: 1, code: "Math 111a", title: "Calculus 1", units: 3, prereq: null },
       { id: 2, code: "Chem 101", title: "Chemistry for Engineers 1", units: 4, prereq: null },
-      { id: 3, code: "CPE 111", title: "Computer Engineering as Discipline", units: 1, prereq: null },
+      { id: 3, code: "CPE 111", title: "Computer Engineering as Discipline", units: 2, prereq: null },
       { id: 4, code: "CPE 112", title: "Programming Logic and Design", units: 2, prereq: null },
       { id: 5, code: "NSTP101", title: "ROTC/CWTS/LTS 1", units: 3, prereq: null },
       { id: 6, code: "MMW", title: "Mathematics in the Modern World", units: 3, prereq: null },

@@ -252,18 +252,26 @@ export const FutureCoursesSection = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <span className="text-[#003366] text-sm font-bold font-['Inter'] uppercase tracking-wider">
+        {/* REPLACED GREEN WITH BLUE (#003366) FOR ACTIVE TOGGLE */}
+        <div className="flex items-center gap-3">
+          <span className="hidden md:block text-[#003366] text-sm font-bold font-['Inter'] uppercase tracking-wider">
             Offered:
           </span>
-          <select 
-            value={upcomingTerm}
-            onChange={(e) => setUpcomingTerm(e.target.value)}
-            className="px-3 py-1.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 font-bold font-['Inter'] rounded-lg text-sm uppercase tracking-wider cursor-pointer focus:outline-none"
-          >
-            <option value="Next Semester">Next Semester</option>
-            <option value="Summer">Summer</option>
-          </select>
+          <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full md:w-fit shrink-0">
+            {['Next Semester', 'Summer'].map((term) => (
+              <button
+                key={term}
+                onClick={() => setUpcomingTerm(term)}
+                className={`flex-1 md:flex-none px-5 py-1.5 text-sm font-bold font-['Inter'] rounded-full transition-all whitespace-nowrap ${
+                  upcomingTerm === term 
+                    ? 'bg-[#003366] text-white shadow-md' 
+                    : 'text-[#003366] hover:bg-black/5'
+                }`}
+              >
+                {term}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -284,18 +292,24 @@ export const FutureCoursesSection = () => {
               key={idx} 
               className="bg-[#E0F2FE] rounded-xl border border-[#003366]/20 p-4 flex flex-col h-36 justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
             >
-              {course.unlockState === 'Secured' && (
-                <div className="absolute top-3 right-3 bg-[#10B981]/10 border border-[#10B981]/30 px-2.5 py-0.5 rounded text-[#10B981] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
-                  <span>✓</span> Secured
+              {/* TOP RIGHT: Status Badge + Units Stacked */}
+              <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5 z-10">
+                {course.unlockState === 'Secured' && (
+                  <div className="bg-[#10B981]/10 border border-[#10B981]/30 px-2.5 py-0.5 rounded text-[#10B981] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
+                    <span>✓</span> Secured
+                  </div>
+                )}
+                {course.unlockState === 'Assumed' && (
+                  <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-2.5 py-0.5 rounded text-[#F59E0B] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
+                    <span>⏳</span> Presumed
+                  </div>
+                )}
+                <div className="bg-[#003366] text-white rounded-lg px-3 py-1 w-fit shadow-sm text-xs font-bold font-['Inter']">
+                  {course.units} Units
                 </div>
-              )}
-              {course.unlockState === 'Assumed' && (
-                <div className="absolute top-3 right-3 bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-2.5 py-0.5 rounded text-[#F59E0B] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
-                  <span>⏳</span> Assumed
-                </div>
-              )}
+              </div>
               
-              <div className="flex flex-col pr-16 mt-1">
+              <div className="flex flex-col pr-24 mt-1 relative z-0">
                 <p className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#003366]/70 leading-none">
                   {course.semesterLabel}
                 </p>
@@ -307,15 +321,17 @@ export const FutureCoursesSection = () => {
                 </p>
               </div>
               
-              <div className="bg-[#003366] text-white rounded-lg px-3 py-1 w-fit mt-auto shadow-sm text-xs font-bold font-['Inter']">
-                {course.units} Units
+              {/* BOTTOM: Prerequisite Courses */}
+              <div className="mt-auto flex items-center gap-1.5 text-[#003366]text-xs font-bold font-['Inter']">
+                <span className="bg-[#10B981]/20 text-[#10B981] rounded-full w-4 h-4 flex items-center justify-center text-[10px] shrink-0">✓</span> 
+                <span className="truncate" title={course.prereq ? `Prereqs: ${course.prereq}` : 'No prerequisites'}>
+                  {course.prereq || 'No prerequisites'}
+                </span>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      
     </section>
   );
 }; 
