@@ -104,6 +104,7 @@ app.get('/api/students', async (req, res) => {
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
 // GET /api/student-records/:user_id - Feed the Dashboard Cards
+// GET /api/student-records/:user_id - Feed the Dashboard Cards
 app.get('/api/student-records/:user_id', async (req, res) => {
     const { user_id } = req.params;
 
@@ -113,16 +114,16 @@ app.get('/api/student-records/:user_id', async (req, res) => {
 
     try {
         const recordsRes = await pool.query(`
-            -- 1. Grab normal database courses
-            SELECT c.id, c.code, c.title AS name, c.units, ar.status, false AS is_petitioned 
+            -- 1. Grab normal database courses with year level and semester details
+            SELECT c.id, c.code, c.title AS name, c.units, c.year_level, c.semester, ar.status, false AS is_petitioned 
             FROM academic_records ar
             JOIN courses c ON ar.course_id = c.id
             WHERE ar.user_id = $1
             
             UNION ALL
             
-            -- 2. Grab petitioned courses and add " 01" to the code
-            SELECT c.id, c.code || ' 01' AS code, c.title AS name, c.units, p.status, true AS is_petitioned 
+            -- 2. Grab petitioned courses with year level and semester details
+            SELECT c.id, c.code || ' 01' AS code, c.title AS name, c.units, c.year_level, c.semester, p.status, true AS is_petitioned 
             FROM petitions p
             JOIN courses c ON p.course_id = c.id
             WHERE p.user_id = $1
@@ -335,7 +336,7 @@ app.post('/api/records', async (req, res) => {
         res.status(200).json({ message: "Academic records and petitions updated successfully!" });
 
     } catch (err) {
-        console.error("Database Save Error:", err.mesage);
+        console.error("Database Save Error:", err.message);
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
 });
