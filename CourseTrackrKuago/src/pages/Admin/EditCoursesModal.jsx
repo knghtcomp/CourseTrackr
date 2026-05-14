@@ -22,7 +22,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
       
       setIsLoading(true);
       try {
-        const coursesRes = await fetch('${import.meta.env.VITE_API_URL}/api/courses');
+        const coursesRes = await fetch(`${import.meta.env.VITE_API_URL}/api/courses`);
         const coursesData = await coursesRes.json();
         setDbCourses(coursesData);
 
@@ -190,7 +190,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
         };
       });
 
-      const response = await fetch('${import.meta.env.VITE_API_URL}/api/records', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

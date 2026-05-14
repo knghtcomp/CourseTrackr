@@ -23,7 +23,7 @@ export const AdminDashboard = () => {
   // Put this function right above your useEffects:
   const refreshStudents = async () => {
     try {
-      const studentsRes = await fetch('${import.meta.env.VITE_API_URL}/api/students');
+      const studentsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/students`);
       const studentsData = await studentsRes.json();
       
       // 🚨 THE FIX: Removed the frontend .filter() because the backend already did it!
@@ -48,7 +48,7 @@ export const AdminDashboard = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const studentsRes = await fetch('${import.meta.env.VITE_API_URL}/api/students');
+        const studentsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/students`);
         const studentsData = await studentsRes.json();
 
         // 🚨 THE FIX: Removed the frontend .filter() here too!
