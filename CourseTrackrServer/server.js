@@ -7,21 +7,17 @@ const { Pool } = require('pg'); // This is the Postgres bridge
 const app = express();
 app.use(cors());
 
-const PORT = 5000;
 
 // Middleware
 app.use(cors()); 
 app.use(express.json());
 
 // Set up the Database Connection
+// Set up the Database Connection
 const pool = new Pool({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:YOUR_LOCAL_PASSWORD@localhost:5432/academic_records',
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
-
 // Test the Connection!
 pool.connect()
     .then(() => console.log('✅ Connected to PostgreSQL database!'))
@@ -543,11 +539,11 @@ app.post('/api/forgot-password', async (req, res) => {
 
 
 // POST /api/reset-password
+// POST /api/reset-password
 app.post('/api/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
 
   try {
-    // 1. Find the user with this token, AND make sure the token hasn't expired yet
     const userRes = await pool.query(
       'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
       [token]
@@ -559,14 +555,14 @@ app.post('/api/reset-password', async (req, res) => {
 
     const userId = userRes.rows[0].id;
 
-    // Optional but highly recommended: If you are using bcrypt to hash passwords, hash it here!
-    // const bcrypt = require('bcrypt');
-    // const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // 🚨 FIX: We MUST hash the new password, just like in signup!
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
     
-    // 2. Update the password and instantly delete the token so it can't be used again
+    // 🚨 FIX: Update the 'password_hash' column, not 'password'
     await pool.query(
-      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
-      [newPassword, userId] // Change newPassword to hashedPassword if you use bcrypt!
+      'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [hashedPassword, userId] 
     );
 
     res.status(200).json({ message: "Password updated successfully!" });
@@ -578,6 +574,8 @@ app.post('/api/reset-password', async (req, res) => {
 });
 
 // Start the server
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
