@@ -40,7 +40,7 @@ export const Setup = () => {
       const currentUser = JSON.parse(currentUserStr);
 
       try {
-        const response = await fetch(`http://localhost:5000/api/student-records/${currentUser.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${currentUser.id}`);
         if (response.ok) {
           const savedRecords = await response.json();
           if (Array.isArray(savedRecords)) {
@@ -190,7 +190,7 @@ export const Setup = () => {
       }));
 
     try {
-      const response = await fetch('http://localhost:5000/api/records', {
+      const response = await fetch('${import.meta.env.VITE_API_URL}/api/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

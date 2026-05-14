@@ -22,11 +22,11 @@ export const EditCoursesModal = ({ student, onClose }) => {
       
       setIsLoading(true);
       try {
-        const coursesRes = await fetch('http://localhost:5000/api/courses');
+        const coursesRes = await fetch('${import.meta.env.VITE_API_URL}/api/courses');
         const coursesData = await coursesRes.json();
         setDbCourses(coursesData);
 
-        const recordsRes = await fetch(`http://localhost:5000/api/student-records/${student.id}`);
+        const recordsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${student.id}`);
         const recordsData = await recordsRes.json();
 
         const initialStatuses = {};
@@ -190,7 +190,7 @@ export const EditCoursesModal = ({ student, onClose }) => {
         };
       });
 
-      const response = await fetch('http://localhost:5000/api/records', {
+      const response = await fetch('${import.meta.env.VITE_API_URL}/api/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

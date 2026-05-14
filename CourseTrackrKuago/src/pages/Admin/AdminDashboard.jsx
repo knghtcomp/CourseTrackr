@@ -23,7 +23,7 @@ export const AdminDashboard = () => {
   // Put this function right above your useEffects:
   const refreshStudents = async () => {
     try {
-      const studentsRes = await fetch('http://localhost:5000/api/students');
+      const studentsRes = await fetch('${import.meta.env.VITE_API_URL}/api/students');
       const studentsData = await studentsRes.json();
       
       // 🚨 THE FIX: Removed the frontend .filter() because the backend already did it!
@@ -48,7 +48,7 @@ export const AdminDashboard = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const studentsRes = await fetch('http://localhost:5000/api/students');
+        const studentsRes = await fetch('${import.meta.env.VITE_API_URL}/api/students');
         const studentsData = await studentsRes.json();
 
         // 🚨 THE FIX: Removed the frontend .filter() here too!
@@ -81,7 +81,7 @@ export const AdminDashboard = () => {
   // 2. FETCH SPECIFIC STUDENT RECORDS ON "EDIT" CLICK
   const handleOpenEdit = async (student) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/student-records/${student.id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${student.id}`);
       const records = await response.json();
       
       const studentWithRecords = {
@@ -102,7 +102,7 @@ export const AdminDashboard = () => {
   // 3. FETCH SPECIFIC STUDENT RECORDS ON "VERIFY" CLICK
   const handleOpenVerify = async (student) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/student-records/${student.id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${student.id}`);
       const records = await response.json();
       
       const studentWithRecords = {
@@ -131,7 +131,7 @@ export const AdminDashboard = () => {
     if (!confirmArchive) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/students/${studentToArchive.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/students/${studentToArchive.id}`, {
         method: 'DELETE', 
       });
 

@@ -9,7 +9,7 @@ export const CompletedCoursesStatsSection = () => {
       if (!currentUserStr) return;
       const currentUser = JSON.parse(currentUserStr);
       try {
-        const response = await fetch(`http://localhost:5000/api/student-records/${currentUser.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${currentUser.id}`);
         if (response.ok) {
           const records = await response.json();
           setCount(records.filter(r => r.status === 'passed').length);

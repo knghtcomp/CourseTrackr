@@ -21,7 +21,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
       setStudentYear(Number(currentUser.yearStanding || currentUser.year_standing) || 1);
 
       try {
-        const response = await fetch(`http://localhost:5000/api/student-records/${currentUser.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${currentUser.id}`);
         if (response.ok) {
           const freshRecords = await response.json();
           setUserRecords(freshRecords);
