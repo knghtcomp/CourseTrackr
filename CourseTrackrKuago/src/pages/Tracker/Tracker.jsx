@@ -1,7 +1,6 @@
 import React from 'react';
 // IMPORTANT: Make sure this path points to your newly updated header file!
-import { StudentDashboardHeaderSection } from "../dashboard/StudentDashboardHeaderSection"; 
-
+import { StudentDashboardHeaderSection } from "./dashboard/StudentDashboardHeaderSection"; 
 import { FutureCoursesSection } from "./FutureCoursesSection";
 
 export const Tracker = () => {
