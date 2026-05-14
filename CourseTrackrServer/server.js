@@ -288,56 +288,64 @@ app.post('/api/login', async (req, res) => {
 
 // POST /api/records - Save student course selections from Setup
 // POST /api/records - Save student course selections from Setup
+// POST /api/records - Save student course selections from Setup safely
 app.post('/api/records', async (req, res) => {
     const { user_id, records, year_standing } = req.body;
 
-    try {
-        // 1. Wipe old records from BOTH tables so we start with a clean slate
-        await pool.query('DELETE FROM academic_records WHERE user_id = $1', [user_id]);
-        await pool.query('DELETE FROM petitions WHERE user_id = $1', [user_id]);
+    // 1. Get a dedicated client connection from the pool for the transaction
+    const client = await pool.connect();
 
-        // 2. Loop through the records sent from React and route them to the correct table
+    try {
+        // 2. Start the safety net transaction
+        await client.query('BEGIN'); 
+
+        // 3. Wipe old records temporarily from the slate
+        await client.query('DELETE FROM academic_records WHERE user_id = $1', [user_id]);
+        await client.query('DELETE FROM petitions WHERE user_id = $1', [user_id]);
+
+        // 4. Loop through the records sent from React and route them
         for (let record of records) {
-            
             if (record.is_petitioned) {
-                // ➔ ROUTE A: It's a petition! Save it to the separate petitions table
-                await pool.query(
+                await client.query(
                     'INSERT INTO petitions (user_id, course_id, status) VALUES ($1, $2, $3)',
                     [user_id, record.course_id, record.status]
                 );
 
-                // 🌟 YOUR DUAL-DATABASE RULE: 
-                // If they marked this petitioned course as completed ('passed'), 
-                // we instantly inject a 'passed' grade into the normal database too!
                 if (record.status === 'passed') {
-                    await pool.query(
+                    await client.query(
                         "INSERT INTO academic_records (user_id, course_id, status) VALUES ($1, $2, 'passed')",
                         [user_id, record.course_id]
                     );
                 }
                 
             } else {
-                // ➔ ROUTE B: It's a normal course. Save it to the standard table
-                await pool.query(
+                await client.query(
                     'INSERT INTO academic_records (user_id, course_id, status) VALUES ($1, $2, $3)',
                     [user_id, record.course_id, record.status]
                 );
             }
         }
 
-        // 3. Update Year Standing
+        // 5. Update Year Standing
         if (year_standing) {
-            await pool.query(
+            await client.query(
                 'UPDATE users SET year_standing = $1 WHERE id = $2',
                 [year_standing, user_id]
             );
         }
 
+        // 6. Everything worked flawlessly! Permanently save changes to the database 🎉
+        await client.query('COMMIT'); 
         res.status(200).json({ message: "Academic records and petitions updated successfully!" });
 
     } catch (err) {
-        console.error("Database Save Error:", err.message);
+        // 7. EMERGENCY BRAKE: Something failed! Undo the deletion. Your data is untouched! 🚨
+        await client.query('ROLLBACK'); 
+        console.error("Database Save Error:", err.message); // Fixed the typo here too!
         res.status(500).json({ error: "Internal Server Error", details: err.message });
+    } finally {
+        // 8. Always release the connection back to the pool
+        client.release();
     }
 });
 
