@@ -540,36 +540,58 @@ app.post('/api/forgot-password', async (req, res) => {
 
 // POST /api/reset-password
 // POST /api/reset-password
-app.post('/api/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
+// POST /api/forgot-password
+app.post('/api/forgot-password', async (req, res) => {
+  const { email } = req.body;
 
   try {
-    const userRes = await pool.query(
-      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
-      [token]
-    );
-
+    const userRes = await pool.query('SELECT id, first_name FROM users WHERE email = $1', [email]);
+    
     if (userRes.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid or expired reset token. Please request a new one." });
+      return res.status(404).json({ message: "We couldn't find an account with that email." });
     }
 
-    const userId = userRes.rows[0].id;
+    const user = userRes.rows[0];
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 3600000); 
 
-    // 🚨 FIX: We MUST hash the new password, just like in signup!
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-    
-    // 🚨 FIX: Update the 'password_hash' column, not 'password'
     await pool.query(
-      'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
-      [hashedPassword, userId] 
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
+      [resetToken, tokenExpiry, email]
     );
 
-    res.status(200).json({ message: "Password updated successfully!" });
+    // ✅ FIX 1: Using secure environment variables instead of hardcoded text
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS  
+      }
+    });
+
+    // ✅ FIX 2: Dynamically routing to Vercel in production, or localhost during testing
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetLink = `${frontendURL}/reset-password/${resetToken}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'CourseTrackr: Password Reset Request',
+      html: `
+        <h3>Hi ${user.first_name},</h3>
+        <p>You requested a password reset. Click the link below to set a new password:</p>
+        <a href="${resetLink}" style="padding: 10px 20px; background-color: #003366; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Reset Password</a>
+        <p style="margin-top: 20px; font-size: 12px; color: gray;">This link will expire in 1 hour. If you did not request this, please ignore this email.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: "Password reset email sent!" });
 
   } catch (error) {
-    console.error("Reset Password Error:", error);
-    res.status(500).json({ message: "An error occurred while resetting the password." });
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ message: "An error occurred while sending the email." });
   }
 });
 
