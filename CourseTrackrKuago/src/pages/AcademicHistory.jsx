@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StudentDashboardHeaderSection } from "./Dashboard/StudentDashboardHeaderSection"; 
+import { StudentDashboardHeaderSection } from "./DashBoard/StudentDashboardHeaderSection"; 
 import { curriculum } from '../data/curriculumData';
 
 export const AcademicHistory = () => {
