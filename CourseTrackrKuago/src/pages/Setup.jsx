@@ -77,13 +77,11 @@ export const Setup = () => {
   // -- CALCULATIONS --
   const totalCourses = selectedCourses.length;
   const totalUnits = selectedCourses.reduce((sum, selectedCourse) => {
-    // ✅ FIX: Directly search the flat curriculum array. 
-    // We check both .course_id and .id to be perfectly safe!
-    const matchedCourse = curriculum.find(c => c.id === selectedCourse.course_id || c.id === selectedCourse.id);
+    // ✅ FIX: Adding .flatMap() back because Setup imports the nested curriculum file!
+    const matchedCourse = curriculum.flatMap(sem => sem.courses).find(c => c.id === selectedCourse.course_id || c.id === selectedCourse.id);
     
-    // Convert units to a number just in case the database sends it as a string
     return sum + (matchedCourse ? Number(matchedCourse.units) : 0);
-}, 0);
+  }, 0);
 
   // Calculate completed courses (status === 'passed')
   const completedCoursesCount = selectedCourses.filter(c => c.status === 'passed').length;
