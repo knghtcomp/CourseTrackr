@@ -8,7 +8,8 @@ const AdminDashboardHeaderSection = () => {
 
   // 1. Fetch and Verify the logged-in user
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
+    // Look for the specific Admin key we just created
+    const storedUser = localStorage.getItem('adminUser');
     
     if (storedUser) {
       try {
@@ -16,10 +17,10 @@ const AdminDashboardHeaderSection = () => {
         
         // 🚨 THE SECURITY FIX: Check if they are actually an Admin!
         if (parsedUser.role !== 'admin') {
-          // If a student tries to access this page, wipe their session and kick them out
-          localStorage.removeItem('currentUser');
+          // If the role fails, wipe the admin key and kick them out
+          localStorage.removeItem('adminUser');
           navigate('/');
-          return; // Stop running the rest of the code
+          return; 
         }
         
         // If they pass the check, set the Admin's Name
@@ -32,14 +33,15 @@ const AdminDashboardHeaderSection = () => {
         console.error("Failed to parse user data from localStorage", error);
       }
     } else {
-      // If no one is logged in at all, kick them to the login page
+      // If no adminUser key exists, kick them to login
       navigate('/');
     }
   }, [navigate]);
 
   // 2. Destroy the session before leaving!
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
+    // Make sure we delete the specific Admin key!
+    localStorage.removeItem('adminUser');
     localStorage.removeItem('setupLocked');
     localStorage.removeItem('gradingPortalOpen');
     navigate('/');
