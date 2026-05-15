@@ -15,7 +15,7 @@ export const FutureCoursesSection = () => {
   // 1. FETCH DATA & AUTO-DETECT TERM
   useEffect(() => {
     const fetchFreshData = async () => {
-      const currentUserStr = localStorage.getItem('currentUser');
+      const currentUserStr = localStorage.getItem('studentUser');
       if (!currentUserStr) {
         setIsLoading(false);
         return;

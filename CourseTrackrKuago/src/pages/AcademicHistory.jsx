@@ -12,7 +12,7 @@ export const AcademicHistory = () => {
   // FETCH: Get the student's actual grades from PostgreSQL
   useEffect(() => {
     const fetchHistory = async () => {
-      const currentUserStr = localStorage.getItem('currentUser');
+      const currentUserStr = localStorage.getItem('studentUser');
       if (!currentUserStr) return;
       const currentUser = JSON.parse(currentUserStr);
 

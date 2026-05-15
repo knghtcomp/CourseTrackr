@@ -8,7 +8,7 @@ export const StudentDashboardHeaderSection = () => {
   const [yearStanding, setYearStanding] = useState(''); 
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
+    const storedUser = localStorage.getItem('studentUser');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);

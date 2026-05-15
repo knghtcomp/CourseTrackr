@@ -8,7 +8,8 @@ export const Setup = () => {
   
   // -- EXISTING STATES --
   const [yearStanding, setYearStanding] = useState(() => {
-    const savedUserStr = localStorage.getItem('currentUser');
+    // ✅ THE FIX 1: Look for the specific student memory key
+    const savedUserStr = localStorage.getItem('studentUser');
     if (savedUserStr) {
       const parsedUser = JSON.parse(savedUserStr);
       const savedYear = parsedUser.yearStanding || parsedUser.year_standing;
@@ -27,11 +28,11 @@ export const Setup = () => {
     setViewYear(yearStanding || 1);
   }, [yearStanding]);
 
-  // -- FETCH LOGIC (UPDATED FOR DUAL RECORDS) --
   // -- FETCH LOGIC (UPDATED FOR SINGLE-ROW RECORDS) --
   useEffect(() => {
     const fetchExistingSetup = async () => {
-      const currentUserStr = localStorage.getItem('currentUser');
+      // ✅ THE FIX 2: Look for the specific student memory key
+      const currentUserStr = localStorage.getItem('studentUser');
       if (!currentUserStr) {
         alert("Session missing! Please log in to set up your account.");
         navigate('/login'); 
@@ -55,8 +56,6 @@ export const Setup = () => {
               
               const current = courseMap.get(id);
               
-              // 🚨 THE FIX: Stop looking for the old word 'petitioned'. 
-              // Directly assign both the base status and the new boolean flag from the database!
               current.status = record.status; 
               current.isPetitioned = record.is_petitioned === true;
             });
@@ -74,12 +73,11 @@ export const Setup = () => {
 
     fetchExistingSetup();
   }, [navigate]);
+
   // -- CALCULATIONS --
   const totalCourses = selectedCourses.length;
   const totalUnits = selectedCourses.reduce((sum, selectedCourse) => {
-    // ✅ FIX: Adding .flatMap() back because Setup imports the nested curriculum file!
     const matchedCourse = curriculum.flatMap(sem => sem.courses).find(c => c.id === selectedCourse.course_id || c.id === selectedCourse.id);
-    
     return sum + (matchedCourse ? Number(matchedCourse.units) : 0);
   }, 0);
 
@@ -93,8 +91,10 @@ export const Setup = () => {
       const matchedCourse = curriculum.flatMap(sem => sem.courses).find(c => c.id === selectedCourse.id);
       return sum + (matchedCourse ? matchedCourse.units : 0);
     }, 0);
+
   // Count ONLY the courses that are actively enrolled (ongoing)
   const enrolledCoursesCount = selectedCourses.filter(course => course.status === 'ongoing').length;
+
   // 🚨 NEW: PREREQUISITE SCANNER HELPER
   const checkPrereqs = (prereqString) => {
     if (!prereqString || prereqString.toLowerCase() === 'none') return { met: true, missing: [] };
@@ -132,7 +132,7 @@ export const Setup = () => {
         // Check standard prerequisites
         const prereqCheck = checkPrereqs(course.prereq);
         
-        // 🚨 THE FIX: Allow enrollment if prereqs are met OR if it's explicitly petitioned
+        // Allow enrollment if prereqs are met OR if it's explicitly petitioned
         if (prereqCheck.met || existingCourse.isPetitioned) {
           const updatedCourses = [...selectedCourses];
           updatedCourses[existingCourseIndex] = { ...existingCourse, status: 'ongoing' };
@@ -171,10 +171,10 @@ export const Setup = () => {
     }
   };
 
-  // -- SAVE LOGIC --
   // -- SAVE LOGIC (CLEAN SINGLE-ROW VERSION) --
   const handleSaveSetup = async () => {
-    const currentUserStr = localStorage.getItem('currentUser');
+    // ✅ THE FIX 3: Look for the specific student memory key
+    const currentUserStr = localStorage.getItem('studentUser');
     if (!currentUserStr) {
       alert("Error: You must be logged in to save your setup.");
       navigate('/login');
@@ -182,13 +182,12 @@ export const Setup = () => {
     }
     const currentUser = JSON.parse(currentUserStr);
 
-    // 🚨 THE FIX: Just map the courses directly to the new database format!
     const formattedRecords = selectedCourses
-      .filter(course => course.status) // Only save if it has a base status
+      .filter(course => course.status) 
       .map(course => ({
         course_id: course.id,
         status: course.status,
-        is_petitioned: course.isPetitioned || false // Send the new boolean flag!
+        is_petitioned: course.isPetitioned || false 
       }));
 
     try {
@@ -206,7 +205,8 @@ export const Setup = () => {
 
       if (response.ok) {
         const updatedUser = { ...currentUser, yearStanding: yearStanding };
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        // ✅ THE FIX 4: Save updates back to the specific student memory key
+        localStorage.setItem('studentUser', JSON.stringify(updatedUser));
         alert("Setup saved successfully! Redirecting to dashboard...");
         navigate('/dashboard');
       } else {
@@ -352,8 +352,6 @@ export const Setup = () => {
               </button>
             ))}
           </div>
-
-          
 
         </section>
 

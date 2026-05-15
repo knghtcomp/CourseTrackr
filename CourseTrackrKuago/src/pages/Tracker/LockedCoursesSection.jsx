@@ -12,7 +12,7 @@ export const LockedCoursesSection = ({ upcomingTerm }) => {
   // 1. FETCH DATA
   useEffect(() => {
     const fetchFreshData = async () => {
-      const currentUserStr = localStorage.getItem('currentUser');
+      const currentUserStr = localStorage.getItem('studentUser');
       if (!currentUserStr) {
         setIsLoading(false);
         return;
