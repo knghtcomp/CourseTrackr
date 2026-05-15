@@ -57,12 +57,12 @@ const AdminDashboardHeaderSection = () => {
             alt="Logo" 
             className="w-8 h-8 md:w-14 md:h-14 drop-shadow-lg" 
           />
-          {/* TEXT: Strictly hidden on mobile */}
-          <div className="hidden md:flex flex-col justify-center ml-2">
-            <h1 className="text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
+          {/* TEXT: Now visible on mobile with properly scaled responsive sizes */}
+          <div className="flex flex-col justify-center ml-1 md:ml-2">
+            <h1 className="text-[14px] md:text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
               COURSETRACKR
             </h1>
-            <h2 className="text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 mt-0.5 whitespace-nowrap">
+            <h2 className="text-[8px] md:text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 md:mt-0.5 whitespace-nowrap">
               Academic Management Tool
             </h2>
           </div>

@@ -121,16 +121,17 @@ export const AcademicHistory = () => {
         </div>
 
         {/* TOGGLES SECTION */}
-        <div className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-2 w-full">
+        {/* Changed flex-col-reverse to flex-col so Years stay on top on mobile */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 w-full">
           
-
-          {/* YEAR TOGGLE (Right Side) */}
-          <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
+          {/* YEAR TOGGLE */}
+          {/* Added grid-cols-2 for mobile to force 2x2 layout, turns back to flex row on desktop (lg:flex) */}
+          <div className="grid grid-cols-2 lg:flex lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit gap-1 lg:gap-0">
             {['1st Year', '2nd Year', '3rd Year', '4th Year'].map((year) => (
               <button
                 key={year}
                 onClick={() => handleYearChange(year)}
-                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                className={`w-full px-2 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                   activeYear === year ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
@@ -139,13 +140,13 @@ export const AcademicHistory = () => {
             ))}
           </div>
           
-          {/* SEMESTER TOGGLE (Left Side) */}
+          {/* SEMESTER TOGGLE */}
           <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
             {availableSemesters.map((sem) => (
               <button
                 key={sem}
                 onClick={() => setActiveSemester(sem)}
-                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                className={`flex-1 px-3 lg:px-6 py-2 text-xs lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                   activeSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
@@ -153,8 +154,6 @@ export const AcademicHistory = () => {
               </button>
             ))}
           </div>
-
-          
 
         </div>
 
