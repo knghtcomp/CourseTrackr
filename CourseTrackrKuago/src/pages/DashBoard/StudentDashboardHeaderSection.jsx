@@ -38,7 +38,8 @@ export const StudentDashboardHeaderSection = () => {
     : 'dashboard';
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
+    // 🚨 BUG FIX: Updated this to clear the new 'studentUser' key!
+    localStorage.removeItem('studentUser');
     localStorage.removeItem('setupLocked');
     localStorage.removeItem('gradingPortalOpen');
     navigate('/');
@@ -46,101 +47,113 @@ export const StudentDashboardHeaderSection = () => {
 
   return (
     <header 
-      className="w-full h-[90px] flex items-center relative shadow-lg z-[100] shrink-0 bg-gradient-to-r from-[#001A33] to-[#004080]"
+      // MOBILE FIX: Slim 60px height on mobile, 90px on desktop
+      className="w-full h-[60px] md:h-[90px] flex items-center relative shadow-lg z-[100] shrink-0 bg-gradient-to-r from-[#001A33] to-[#004080]"
     >
-      <div className="w-full max-w-[1440px] mx-auto flex items-center px-4 lg:px-6 h-full">
+      {/* MOBILE FIX: justify-between separates into strictly 3 zones */}
+      <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between px-3 md:px-6 h-full gap-2">
         
-        {/* GROUP 1: Branding + Navigation Links */}
-        <div className="flex flex-row items-center -ml-6 lg:-ml-8 gap-6 lg:gap-10">
-          
-          {/* Logo & Text */}
-          <div className="flex flex-row items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
-            <img 
-              src="/logo.svg" 
-              alt="Logo" 
-              className="w-12 h-12 lg:w-14 lg:h-14 -mr-1 drop-shadow-lg" 
-            />
-            <div className="flex flex-col justify-center ml-2">
-              <h1 className="text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
-                COURSETRACKR
-              </h1>
-              <h2 className="text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 mt-0.5 whitespace-nowrap">
-                Academic Management Tool
-              </h2>
-            </div>
+        {/* ==============================
+            ZONE 1: LOGO (Left)
+        ============================== */}
+        <div 
+          className="flex items-center cursor-pointer shrink-0" 
+          onClick={() => navigate('/dashboard')}
+        >
+          <img 
+            src="/logo.svg" 
+            alt="Logo" 
+            className="w-8 h-8 md:w-14 md:h-14 drop-shadow-lg" 
+          />
+          {/* TEXT: Strictly hidden on mobile */}
+          <div className="hidden md:flex flex-col justify-center ml-2">
+            <h1 className="text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
+              COURSETRACKR
+            </h1>
+            <h2 className="text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 mt-0.5 whitespace-nowrap">
+              Academic Management Tool
+            </h2>
           </div>
+        </div>
 
-          {/* Nav Buttons Container (Segmented Toggle UI) */}
-          <div className="flex p-1.5 bg-black/20 rounded-2xl border border-white/10 backdrop-blur-sm ml-2 lg:ml-6">
+        {/* ==============================
+            ZONE 2: NAVIGATION (Center)
+        ============================== */}
+        <div className="flex items-center">
+          
+          <div className="flex p-1 bg-black/20 rounded-xl md:rounded-2xl border border-white/10 backdrop-blur-sm gap-1 md:gap-2">
             
             {/* DASHBOARD BUTTON */}
             <button 
+              title="Dashboard"
               onClick={() => navigate('/dashboard')}
-              className={`flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-300 group ${
+              // MOBILE FIX: w-10 h-10 forces a perfect square icon on phones
+              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'dashboard' 
-                ? 'bg-[#FFCC00] text-[#001A33] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
-                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
+                : 'hover:bg-white/10'
               }`}
             >
               <img 
                 src="/dashboard.svg" 
-                alt="" 
-                className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-all duration-300 ${
+                alt="Dashboard" 
+                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'dashboard' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
-              <span className="text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap">
+              {/* TEXT: Strictly hidden on mobile */}
+              <span className={`hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap ${isActive === 'dashboard' ? 'text-[#001A33]' : 'text-gray-300 group-hover:text-white'}`}>
                 Dashboard
               </span>
             </button>
 
             {/* TRACKER BUTTON */}
             <button 
+              title="Tracker"
               onClick={() => navigate('/tracker')}
-              className={`flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-300 group ${
+              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'tracker' 
-                ? 'bg-[#FFCC00] text-[#001A33] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
-                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
+                : 'hover:bg-white/10'
               }`}
             >
               <img 
                 src="/trackr.svg" 
-                alt="" 
-                className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-all duration-300 ${
+                alt="Tracker" 
+                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'tracker' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
-              <span className="text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap">
+              <span className={`hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap ${isActive === 'tracker' ? 'text-[#001A33]' : 'text-gray-300 group-hover:text-white'}`}>
                 Tracker
               </span>
             </button>
 
-            {/* ACADEMIC HISTORY BUTTON */}
+            {/* EVALUATION BUTTON */}
             <button 
+              title="Evaluation"
               onClick={() => navigate('/history')}
-              className={`flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-300 group ${
+              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'history' 
-                ? 'bg-[#FFCC00] text-[#001A33] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
-                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
+                : 'hover:bg-white/10'
               }`}
             >
               <img 
                 src="/academichistory.svg" 
-                alt="" 
-                className={`w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-all duration-300 ${
+                alt="Evaluation" 
+                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'history' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
-              <span className="text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap">
+              <span className={`hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap ${isActive === 'history' ? 'text-[#001A33]' : 'text-gray-300 group-hover:text-white'}`}>
                 Evaluation
               </span>
             </button>
 
           </div>
 
-        </div>
-        
-        {/* Text Links (About, Privacy) */}
+          {/* Text Links (About, Privacy) - Safely hidden away on mobile screens */}
           <div className="hidden xl:flex items-center gap-6 ml-6 border-l border-white/20 pl-6">
             <button 
               onClick={() => navigate('/about')}
@@ -156,11 +169,14 @@ export const StudentDashboardHeaderSection = () => {
             </button>
           </div>
 
+        </div>
 
-        {/* GROUP 2: USER INFO & LOGOUT (Pinned to right edge) */}
-        <div className="ml-auto flex items-center gap-4 lg:gap-6">
+        {/* ==============================
+            ZONE 3: LOGOUT (Right)
+        ============================== */}
+        <div className="flex items-center gap-2 md:gap-4 lg:gap-6 shrink-0">
           
-          {/* Display User Name and Year Standing */}
+          {/* Display User Name and Year Standing (Hidden on mobile) */}
           {userName && (
             <div className="hidden md:flex flex-col items-end">
               <span className="text-white text-[14px] lg:text-[15px] font-bold font-['Inter']">
@@ -172,24 +188,26 @@ export const StudentDashboardHeaderSection = () => {
             </div>
           )}
 
-          {/* Logout Button (Matching Glassy Segmented UI) */}
-          <div className="flex p-1.5 bg-black/20 rounded-2xl border border-white/10 backdrop-blur-sm">
+          {/* Logout Button */}
+          <div className="flex p-1 bg-black/20 rounded-xl md:rounded-2xl border border-white/10 backdrop-blur-sm">
             <button 
+              title="Logout"
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 h-10 rounded-xl transition-all duration-300 group text-gray-300 hover:text-white hover:bg-white/10"
+              // MOBILE FIX: w-10 h-10 square button
+              className="flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
             >
               <img 
                 src="/logout.svg" 
-                alt="" 
-                className="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100" 
+                alt="Logout" 
+                className="w-5 h-5 shrink-0 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100" 
               />
-              <span className="text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap">
+              {/* TEXT: Strictly hidden on mobile */}
+              <span className="hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap text-gray-300 group-hover:text-white">
                 Logout
               </span>
             </button>
           </div>
           
-
         </div>
 
       </div>

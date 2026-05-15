@@ -96,22 +96,55 @@ export const Setup = () => {
   const enrolledCoursesCount = selectedCourses.filter(course => course.status === 'ongoing').length;
 
   // 🚨 NEW: PREREQUISITE SCANNER HELPER
-  const checkPrereqs = (prereqString) => {
+  // 🚨 NEW: PREREQUISITE SCANNER HELPER (UPDATED FOR OJT)
+  const checkPrereqs = (course) => {
+    const prereqString = course.prereq;
+
+    // 1. STRICT OJT CHECK: "No subjects behind"
+    const isOJT = course.title && (course.title.toLowerCase().includes('on the job') || course.title.toLowerCase().includes('ojt'));
+    const isNoSubjectsBehind = prereqString && prereqString.toLowerCase().includes('no subjects behind');
+
+    if (isOJT || isNoSubjectsBehind) {
+      let missingCount = 0;
+      let reachedCurrentSem = false;
+      
+      // Scan the curriculum chronologically from 1st Year onwards
+      curriculum.forEach(sem => {
+        // If we find the semester containing OJT, stop scanning previous semesters
+        if (sem.courses.some(c => c.id === course.id)) {
+          reachedCurrentSem = true;
+        }
+        
+        // For every semester BEFORE the OJT semester, check if all courses are passed
+        if (!reachedCurrentSem) {
+          sem.courses.forEach(c => {
+            const isPassed = selectedCourses.some(sc => sc.id === c.id && sc.status === 'passed');
+            if (!isPassed) missingCount++;
+          });
+        }
+      });
+
+      if (missingCount > 0) {
+        // Return a custom error message specifically for OJT
+        return { 
+          met: false, 
+          missing: [`Strict Rule: You have ${missingCount} uncompleted subject(s) behind you. All previous courses must be completed first`] 
+        };
+      }
+    }
+
+    // 2. STANDARD PREREQUISITE CHECK (For all other normal courses)
     if (!prereqString || prereqString.toLowerCase() === 'none') return { met: true, missing: [] };
     
-    // Split prereqs (e.g., "CPE111, MATH101")
     const prereqCodes = prereqString.split(',').map(s => s.trim().toUpperCase());
     const missing = [];
 
     prereqCodes.forEach(code => {
-      // Ignore text-based rules like "3rd Year Standing" for now
       if (code.includes("YEAR") || code.includes("STANDING")) return;
 
-      // Find the prerequisite course ID in the curriculum
       const pCourse = curriculum.flatMap(term => term.courses).find(c => c.code.toUpperCase() === code);
       
       if (pCourse) {
-        // Check if this prereq is marked as 'passed' in the student's selections
         const isPassed = selectedCourses.some(c => c.id === pCourse.id && c.status === 'passed');
         if (!isPassed) missing.push(code);
       }
@@ -129,8 +162,8 @@ export const Setup = () => {
       
       if (existingCourse.status === 'passed') {
         
-        // Check standard prerequisites
-        const prereqCheck = checkPrereqs(course.prereq);
+       // New way
+const prereqCheck = checkPrereqs(course);
         
         // Allow enrollment if prereqs are met OR if it's explicitly petitioned
         if (prereqCheck.met || existingCourse.isPetitioned) {
