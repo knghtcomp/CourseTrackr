@@ -1,26 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-export const OngoingCoursesStatsSection = () => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const fetchRecords = async () => {
-      const currentUserStr = localStorage.getItem('currentUser');
-      if (!currentUserStr) return;
-      const currentUser = JSON.parse(currentUserStr);
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/student-records/${currentUser.id}`);
-        if (response.ok) {
-          const records = await response.json();
-          setCount(records.filter(r => r.status === 'ongoing').length);
-        }
-      } catch (err) {
-        console.error("Failed to load ongoing courses:", err);
-      }
-    };
-    fetchRecords();
-  }, []);
-
+// ✅ THE FIX: Tell the component to accept the 'count' passed down from Dashboard.jsx
+export const OngoingCoursesStatsSection = ({ count = 0 }) => {
   return (
     <div className="w-full bg-white/60 rounded-3xl border border-black/30 px-6 py-4 flex items-center justify-between shadow-sm min-h-[88px]">
       <div className="flex flex-col gap-1">
