@@ -41,12 +41,20 @@ export const ForgotPassword = () => {
       <button 
         type="button"
         onClick={() => navigate('/')} 
-        className="absolute top-6 left-6 lg:top-12 lg:left-12 text-[#003366] hover:opacity-70 transition-opacity"
+        className="group absolute top-6 left-6 lg:top-10 lg:left-10 flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 bg-gray-50 border border-gray-200 text-[#003366] rounded-full hover:bg-[#003366] hover:text-[#FFCC00] hover:border-[#003366] hover:shadow-md transition-all duration-300 z-50"
         aria-label="Back to Login"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 lg:h-8 lg:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-300 group-hover:-translate-x-1" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor" 
+          strokeWidth={2.5}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
+        <span className="font-bold font-['Inter'] text-sm lg:text-base tracking-wide">Back</span>
       </button>
 
       <div className="w-full max-w-[440px]">
