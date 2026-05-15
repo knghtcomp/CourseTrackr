@@ -1,21 +1,45 @@
 @import "tailwindcss";
 
-
 @font-face {
   font-family: 'Calistoga';
-  src: url('./assets/fonts/Calistoga-Regular.ttf') format('truetype');
+  /* Start right at the root slash! */
+  src: url('/Calistoga-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Castoro';
-  src: url('./assets/fonts/Castoro-Regular.ttf') format('truetype');
+  /* Start right at the root slash! */
+  src: url('/Castoro-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Inter';
+  /* Start right at the root slash! */
+  src: url('/Inter-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Caladea';
+  src: url('/Caladea-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Fjord One';
+  src: url('/FjordOne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 @theme {
+/* ... the rest of your theme stays exactly the same! */
   --color-primary: #003366; 
   --color-secondary: #E9EBEF;
   --color-background: #FFFFFF;
