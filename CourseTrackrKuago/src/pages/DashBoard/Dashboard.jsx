@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-// Sections
 import { StudentDashboardHeaderSection } from "./StudentDashboardHeaderSection";
 import { WelcomeMessageSection } from "./WelcomeMessageSection";
 import { CompletedCoursesStatsSection } from './CompletedCourseStatSection';
@@ -14,7 +12,7 @@ export const DashBoard = () => {
 
   // 🔹 Helper: Get current user
   const getCurrentUser = () => {
-    const userStr = localStorage.getItem("currentUser");
+    const userStr = localStorage.getItem('studentUser');
     return userStr ? JSON.parse(userStr) : null;
   };
 
