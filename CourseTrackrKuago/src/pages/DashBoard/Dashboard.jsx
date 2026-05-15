@@ -22,6 +22,7 @@ export const DashBoard = () => {
   };
 
   // 🔹 Fetch data
+  // 🔹 Fetch data
   const fetchMyData = async () => {
     const currentUser = getCurrentUser();
     if (!currentUser) return;
@@ -32,28 +33,11 @@ export const DashBoard = () => {
 
       const data = await response.json();
       
-      // 🚨 THE FIX: Merge dual records so the Dashboard knows which ones are petitioned
-      const courseMap = new Map();
+      // 🚨 THE FIX: The backend does all the heavy lifting now! 
+      // It sends perfect arrays with 'status' and 'is_petitioned' already set.
+      // We just pass it straight into the state!
+      setMyCourses(data);
       
-      data.forEach(record => {
-        const id = Number(record.id || record.course_id);
-        if (!courseMap.has(id)) {
-          // Initialize with base data
-          courseMap.set(id, { ...record, status: 'pending', isPetitioned: false });
-        }
-        
-        const current = courseMap.get(id);
-        if (record.status === 'petitioned') {
-          current.isPetitioned = true;
-        } else {
-          current.status = record.status; // 'passed' or 'ongoing'
-        }
-      });
-
-      // Convert the map back to a clean array of courses
-      const mergedRecords = Array.from(courseMap.values());
-      
-      setMyCourses(mergedRecords);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     }
@@ -91,15 +75,16 @@ export const DashBoard = () => {
   };
 
   // 🔹 Derived data (cleaner + reusable)
+  // 🔹 Derived data (cleaner + reusable)
   const completedCourses = myCourses.filter(c => c.status === "passed");
-  
-  // This will cleanly grab courses that are 'ongoing' (even if they also have isPetitioned: true attached!)
   const ongoingCourses = myCourses.filter(c => c.status === "ongoing");
 
   const completedCount = completedCourses.length;
   const ongoingCount = ongoingCourses.length;
+  
+  // 🚨 THE FIX: Wrap units in Number() so the database doesn't accidentally do string math ("3"+"3"="33")
   const unitsCompletedCount = completedCourses.reduce(
-    (total, course) => total + course.units,
+    (total, course) => total + Number(course.units || 0),
     0
   );
 
