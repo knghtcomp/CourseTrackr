@@ -165,7 +165,30 @@ export const AcademicHistory = () => {
                   {displayedTerm.semester}
                 </h2>
 
-                <div className="overflow-x-auto">
+                {/* MOBILE FIX: Slim Card Layout showing ONLY Title and Status */}
+                <div className="block lg:hidden">
+                  <div className="flex flex-col gap-3">
+                    {displayedTerm.courses.map((course, idx) => {
+                      const savedRecord = userRecords.find(record => record.id === course.id);
+                      const currentStatus = savedRecord && savedRecord.status !== 'pending' ? savedRecord.status : "pending";
+                      const isPetitioned = savedRecord ? savedRecord.isPetitioned : false;
+
+                      return (
+                        <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-4 shadow-sm">
+                          <span className="text-black font-bold font-['Inter'] text-sm leading-tight">
+                            {course.title}
+                          </span>
+                          <div className="shrink-0">
+                            {renderBadges(currentStatus, isPetitioned)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Desktop Table Layout (Hidden on Mobile) */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                       <tr className="border-b-2 border-[#003366]/20">

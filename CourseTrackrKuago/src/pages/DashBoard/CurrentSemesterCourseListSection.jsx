@@ -29,17 +29,21 @@ export const CurrentSemesterCourseListSection = ({ courses }) => {
                     {course.code}
                   </span>
                   
-                  <div className="flex flex-wrap items-center justify-end gap-2">
+                  {/* MOBILE FIX: Removed flex-wrap to keep them side-by-side, added tight gap */}
+                  <div className="flex items-center justify-end gap-1.5 md:gap-2 shrink-0">
                     
-                    {/* Petition Badge */}
+                    {/* Petition Badge - Star only on mobile, full text on desktop */}
                     {isCoursePetitioned && (
-                      <span className="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 rounded-lg font-bold font-['Inter'] text-xs uppercase tracking-wider shrink-0">
-                        ★ Petitioned
+                      <span 
+                        title="Petitioned Course"
+                        className="flex items-center justify-center bg-purple-100 text-purple-700 border border-purple-200 w-6 h-6 md:w-auto md:h-auto md:px-3 md:py-1 rounded-full md:rounded-lg font-bold font-['Inter'] text-xs md:text-xs uppercase tracking-wider shrink-0"
+                      >
+                        ★<span className="hidden md:inline md:ml-1">Petitioned</span>
                       </span>
                     )}
 
                     {/* Standard Status Badge */}
-                    <span className="bg-[#F59E0B]/10 text-[#F59E0B] px-3 py-1 rounded-lg font-bold font-['Inter'] text-xs uppercase tracking-wider shrink-0">
+                    <span className="bg-[#F59E0B]/10 text-[#F59E0B] px-2 md:px-3 py-1 rounded-md md:rounded-lg font-bold font-['Inter'] text-[10px] md:text-xs uppercase tracking-wider shrink-0">
                       {course.status === 'ongoing' ? 'Enrolled' : course.status}
                     </span>
                   </div>

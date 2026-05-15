@@ -354,15 +354,16 @@ const prereqCheck = checkPrereqs(course);
         </section>
 
         {/* 3. Toggles for Curriculum Navigation */}
-        <section className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
+        <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
           
           {/* YEAR TOGGLE (Right Side) */}
-          <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
+          {/* MOBILE FIX: grid-cols-2 forces a 2x2 grid on mobile, lg:flex returns it to a single row on desktop */}
+          <div className="grid grid-cols-2 lg:flex lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit gap-1 lg:gap-0">
             {[1, 2, 3, 4].map(y => (
               <button
                 key={y}
                 onClick={() => handleYearTabClick(y)}
-                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                className={`w-full px-2 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                   viewYear === y ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
@@ -377,7 +378,7 @@ const prereqCheck = checkPrereqs(course);
               <button
                 key={sem}
                 onClick={() => setViewSemester(sem)}
-                className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                className={`flex-1 px-3 lg:px-6 py-2 text-xs lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                   viewSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                 }`}
               >
