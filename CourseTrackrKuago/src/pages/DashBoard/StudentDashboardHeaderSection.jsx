@@ -38,7 +38,6 @@ export const StudentDashboardHeaderSection = () => {
     : 'dashboard';
 
   const handleLogout = () => {
-    // 🚨 BUG FIX: Updated this to clear the new 'studentUser' key!
     localStorage.removeItem('studentUser');
     localStorage.removeItem('setupLocked');
     localStorage.removeItem('gradingPortalOpen');
@@ -47,10 +46,8 @@ export const StudentDashboardHeaderSection = () => {
 
   return (
     <header 
-      // MOBILE FIX: Slim 60px height on mobile, 90px on desktop
       className="w-full h-[60px] md:h-[90px] flex items-center relative shadow-lg z-[100] shrink-0 bg-gradient-to-r from-[#001A33] to-[#004080]"
     >
-      {/* MOBILE FIX: justify-between separates into strictly 3 zones */}
       <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between px-3 md:px-6 h-full gap-2">
         
         {/* ==============================
@@ -65,12 +62,12 @@ export const StudentDashboardHeaderSection = () => {
             alt="Logo" 
             className="w-8 h-8 md:w-14 md:h-14 drop-shadow-lg" 
           />
-          {/* TEXT: Strictly hidden on mobile */}
-          <div className="hidden md:flex flex-col justify-center ml-2">
-            <h1 className="text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
+          {/* TEXT: Now visible on mobile with properly scaled responsive sizes */}
+          <div className="flex flex-col justify-center ml-1 md:ml-2">
+            <h1 className="text-[14px] md:text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
               COURSETRACKR
             </h1>
-            <h2 className="text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 mt-0.5 whitespace-nowrap">
+            <h2 className="text-[8px] md:text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 md:mt-0.5 whitespace-nowrap">
               Academic Management Tool
             </h2>
           </div>
@@ -87,7 +84,6 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Dashboard"
               onClick={() => navigate('/dashboard')}
-              // MOBILE FIX: w-10 h-10 forces a perfect square icon on phones
               className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'dashboard' 
                 ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
@@ -101,7 +97,6 @@ export const StudentDashboardHeaderSection = () => {
                   isActive === 'dashboard' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
-              {/* TEXT: Strictly hidden on mobile */}
               <span className={`hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap ${isActive === 'dashboard' ? 'text-[#001A33]' : 'text-gray-300 group-hover:text-white'}`}>
                 Dashboard
               </span>
@@ -193,7 +188,6 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Logout"
               onClick={handleLogout}
-              // MOBILE FIX: w-10 h-10 square button
               className="flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
             >
               <img 
@@ -201,7 +195,6 @@ export const StudentDashboardHeaderSection = () => {
                 alt="Logout" 
                 className="w-5 h-5 shrink-0 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100" 
               />
-              {/* TEXT: Strictly hidden on mobile */}
               <span className="hidden md:block text-[13px] lg:text-[15px] font-bold font-['Inter'] whitespace-nowrap text-gray-300 group-hover:text-white">
                 Logout
               </span>
