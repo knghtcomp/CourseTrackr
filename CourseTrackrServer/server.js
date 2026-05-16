@@ -546,6 +546,43 @@ app.post('/api/forgot-password', async (req, res) => {
   }
 });
 
+
+// Don't forget to require bcrypt at the top of your file if you haven't already!
+// const bcrypt = require('bcrypt');
+
+app.post('/api/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // 1. Find the user with this exact token, AND make sure the token hasn't expired
+    const userRes = await pool.query(
+      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(400).json({ message: "This password reset link is invalid or has expired." });
+    }
+
+    const userId = userRes.rows[0].id;
+
+    // 2. Hash the new password before saving it
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // 3. Update the password AND clear out the token so it can't be used again
+    await pool.query(
+      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [hashedPassword, userId]
+    );
+
+    res.status(200).json({ message: "Password updated successfully!" });
+
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ message: "Server error while resetting password." });
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 5000;
 
