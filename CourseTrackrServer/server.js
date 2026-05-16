@@ -1,3 +1,5 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 const bcrypt = require('bcrypt');
 require('dotenv').config(); // This loads your .env file
 const express = require('express');
