@@ -86,7 +86,7 @@ export const DashBoard = () => {
     <main className="flex flex-col w-full min-h-screen bg-[#F4F7FA] font-sans">
       <StudentDashboardHeaderSection />
 
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[58px] mt-8 flex flex-col gap-10 pb-10">
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-6 lg:px-[58px] mt-4 md:mt-8 flex flex-col gap-6 md:gap-10 pb-6 md:pb-10">
 
         {/* Welcome */}
         <section aria-label="Welcome message">

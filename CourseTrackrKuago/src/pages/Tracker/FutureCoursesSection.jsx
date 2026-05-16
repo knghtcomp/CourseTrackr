@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { curriculum } from '../../data/curriculumData';
 
-
 export const FutureCoursesSection = () => {
   const [eligibleCourses, setEligibleCourses] = useState([]);
   const [upcomingTerm, setUpcomingTerm] = useState("Next Semester"); 
@@ -241,13 +240,15 @@ export const FutureCoursesSection = () => {
   }, [userRecords, upcomingTerm, studentYear, isLoading]);
 
   return (
-    <section className="flex flex-col gap-6 w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[#003366] text-2xl lg:text-3xl font-bold font-['Calistoga'] m-0">
+    // MOBILE FIX: Tightened the main gap slightly on phones
+    <section className="flex flex-col gap-4 md:gap-6 w-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+        <div className="flex flex-col gap-0.5 md:gap-1">
+          {/* MOBILE FIX: Scaled down text and tightened line height */}
+          <h2 className="text-[#003366] text-xl md:text-2xl lg:text-3xl font-bold font-['Calistoga'] m-0 leading-tight">
             Course Suggestions
           </h2>
-          <p className="text-[#003366]/70 text-[16px] italic font-['Calistoga'] m-0">
+          <p className="text-[#003366]/70 text-sm md:text-[16px] italic font-['Calistoga'] m-0 leading-snug">
             Based on your standing, here are your next available subjects.
           </p>
         </div>
@@ -262,7 +263,8 @@ export const FutureCoursesSection = () => {
               <button
                 key={term}
                 onClick={() => setUpcomingTerm(term)}
-                className={`flex-1 md:flex-none px-5 py-1.5 text-sm font-bold font-['Inter'] rounded-full transition-all whitespace-nowrap ${
+                // MOBILE FIX: Scaled text down to xs on phones so the buttons fit perfectly
+                className={`flex-1 md:flex-none px-3 md:px-5 py-1.5 text-xs md:text-sm font-bold font-['Inter'] rounded-full transition-all whitespace-nowrap ${
                   upcomingTerm === term 
                     ? 'bg-[#003366] text-white shadow-md' 
                     : 'text-[#003366] hover:bg-black/5'
@@ -276,54 +278,59 @@ export const FutureCoursesSection = () => {
       </div>
       
       {isLoading ? (
-        <div className="w-full bg-white rounded-3xl border border-black/10 p-10 text-center shadow-sm">
-          <p className="text-gray-500 font-medium font-['Inter'] animate-pulse">Checking credentials...</p>
+        <div className="w-full bg-white rounded-2xl md:rounded-3xl border border-black/10 p-6 md:p-10 text-center shadow-sm">
+          <p className="text-gray-500 font-medium font-['Inter'] animate-pulse text-sm md:text-base">Checking credentials...</p>
         </div>
       ) : eligibleCourses.length === 0 ? (
-        <div className="w-full bg-white rounded-3xl border border-black/10 p-10 text-center shadow-sm">
-          <p className="text-gray-500 font-medium font-['Inter']">
+        <div className="w-full bg-white rounded-2xl md:rounded-3xl border border-black/10 p-6 md:p-10 text-center shadow-sm">
+          <p className="text-gray-500 font-medium font-['Inter'] text-sm md:text-base">
             No eligible courses available for the {upcomingTerm}. 
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        // MOBILE FIX: Tightened the grid gap on mobile
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
           {eligibleCourses.map((course, idx) => (
             <div 
               key={idx} 
-              className="bg-[#E0F2FE] rounded-xl border border-[#003366]/20 p-4 flex flex-col h-36 justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+              // MOBILE FIX: Swapped min-h-[140px] for h-fit so the card perfectly shrinks to fit the content on phones, while keeping the fixed h-36 on desktops
+              className="bg-[#E0F2FE] rounded-xl border border-[#003366]/20 p-3 md:p-4 flex flex-col h-fit md:h-36 justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
             >
               {/* TOP RIGHT: Status Badge + Units Stacked */}
-              <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5 z-10">
+              <div className="absolute top-2.5 right-2.5 md:top-3 md:right-3 flex flex-col items-end gap-1 md:gap-1.5 z-10">
                 {course.unlockState === 'Secured' && (
-                  <div className="bg-[#10B981]/10 border border-[#10B981]/30 px-2.5 py-0.5 rounded text-[#10B981] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
+                  <div className="bg-[#10B981]/10 border border-[#10B981]/30 px-2 py-0.5 md:px-2.5 rounded text-[#10B981] text-[9px] md:text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
                     <span>✓</span> Secured
                   </div>
                 )}
                 {course.unlockState === 'Assumed' && (
-                  <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-2.5 py-0.5 rounded text-[#F59E0B] text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
+                  <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-2 py-0.5 md:px-2.5 rounded text-[#F59E0B] text-[9px] md:text-[10px] font-bold font-['Inter'] uppercase flex items-center gap-1">
                     <span>⏳</span> Presumed
                   </div>
                 )}
-                <div className="bg-[#003366] text-white rounded-lg px-3 py-1 w-fit shadow-sm text-xs font-bold font-['Inter']">
+                <div className="bg-[#003366] text-white rounded-md md:rounded-lg px-2 py-0.5 md:px-3 md:py-1 w-fit shadow-sm text-[10px] md:text-xs font-bold font-['Inter']">
                   {course.units} Units
                 </div>
               </div>
               
-              <div className="flex flex-col pr-24 mt-1 relative z-0">
-                <p className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#003366]/70 leading-none">
+              <div className="flex flex-col pr-16 md:pr-24 relative z-0">
+                <p className="text-[10px] md:text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#003366]/70 leading-none">
                   {course.semesterLabel}
                 </p>
-                <h3 className="text-xl font-bold font-['Calistoga'] leading-none mt-1.5 text-[#003366]">
+                {/* MOBILE FIX: Shrunk the gap above the code */}
+                <h3 className="text-lg md:text-xl font-bold font-['Calistoga'] leading-none mt-1 text-[#003366]">
                   {course.code}
                 </h3>
-                <p className="text-sm font-medium font-['Inter'] leading-snug mt-1.5 line-clamp-2 text-black/80">
+                {/* MOBILE FIX: Tightened the line-height and margin above the title to save vertical space */}
+                <p className="text-[11px] md:text-sm font-medium font-['Inter'] leading-tight mt-1 line-clamp-2 text-black/80">
                   {course.title}
                 </p>
               </div>
               
               {/* BOTTOM: Prerequisite Courses */}
-              <div className="mt-auto flex items-center gap-1.5 text-[#003366]text-xs font-bold font-['Inter']">
-                <span className="bg-[#10B981]/20 text-[#10B981] rounded-full w-4 h-4 flex items-center justify-center text-[10px] shrink-0">✓</span> 
+              {/* MOBILE FIX: Tightened the top margin (mt-2 md:mt-auto) so it stays compact */}
+              <div className="mt-2 md:mt-auto flex items-center gap-1.5 text-[#003366] text-[10px] md:text-xs font-bold font-['Inter']">
+                <span className="bg-[#10B981]/20 text-[#10B981] rounded-full w-3.5 h-3.5 md:w-4 md:h-4 flex items-center justify-center text-[8px] md:text-[10px] shrink-0">✓</span> 
                 <span className="truncate" title={course.prereq ? `Prereqs: ${course.prereq}` : 'No prerequisites'}>
                   {course.prereq || 'No prerequisites'}
                 </span>

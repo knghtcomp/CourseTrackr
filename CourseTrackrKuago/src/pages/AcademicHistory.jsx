@@ -100,32 +100,35 @@ export const AcademicHistory = () => {
   const displayedTerm = termsInActiveYear.find(t => t.semester.includes(activeSemester));
 
   return (
-    <main className="flex flex-col w-full min-h-screen bg-[#F4F7FA] font-sans pb-16">
+    // MOBILE FIX: Reduced bottom padding on phones
+    <main className="flex flex-col w-full min-h-screen bg-[#F4F7FA] font-sans pb-10 md:pb-16">
       <StudentDashboardHeaderSection />
       
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[58px] mt-10 flex flex-col gap-10">
+      {/* 🚨 THE FIX: Scaled padding, top margin, and inner gaps down for mobile! 🚨 */}
+      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-6 lg:px-[58px] mt-4 md:mt-10 flex flex-col gap-4 md:gap-6 lg:gap-10">
         
         {/* PAGE TITLE */}
         <div className="w-full flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-[#003366] text-[32px] lg:text-[40px] font-bold font-['Calistoga'] leading-tight m-0">
+          {/* TITLE LINE */}
+          <div className="flex items-center gap-2 md:gap-3">
+            <h1 className="text-[#003366] text-[28px] md:text-[32px] lg:text-[40px] font-bold font-['Calistoga'] leading-tight m-0">
               Academic History
             </h1>
-            <span className="text-3xl animate-bounce">📚</span>
+            <span className="text-2xl md:text-3xl animate-bounce">📚</span>
           </div>
-          <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4 mt-1">
-            <p className="text-[#003366]/70 text-[16px] lg:text-[18px] italic font-['Calistoga'] m-0">
+
+          {/* SUBTEXT */}
+          <div className="flex flex-col lg:flex-row lg:items-center gap-1 md:gap-2 lg:gap-4 mt-0.5 md:mt-1">
+            <p className="text-[#003366]/70 text-sm md:text-[16px] lg:text-[18px] italic font-['Calistoga'] m-0 leading-snug">
               Review your past courses, requirements, and completed units.
             </p>
           </div>
         </div>
 
         {/* TOGGLES SECTION */}
-        {/* Changed flex-col-reverse to flex-col so Years stay on top on mobile */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 w-full">
           
           {/* YEAR TOGGLE */}
-          {/* Added grid-cols-2 for mobile to force 2x2 layout, turns back to flex row on desktop (lg:flex) */}
           <div className="grid grid-cols-2 lg:flex lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit gap-1 lg:gap-0">
             {['1st Year', '2nd Year', '3rd Year', '4th Year'].map((year) => (
               <button
@@ -158,24 +161,29 @@ export const AcademicHistory = () => {
         </div>
 
         {/* TABLE SECTION */}
+          {/* MOBILE FIX: Tightened the gap holding the table box */}
           <div className="flex flex-col gap-2">
             {displayedTerm ? (
-              <div className="w-full bg-white rounded-2xl border border-black/10 p-5 lg:p-6 shadow-sm overflow-hidden flex flex-col gap-4">
-                <h2 className="text-[#003366] text-xl font-bold font-['Calistoga'] border-b-2 border-gray-100 pb-3">
+              // MOBILE FIX: Shrunk the outer padding of the table container on phones
+              <div className="w-full bg-white rounded-2xl border border-black/10 p-4 lg:p-6 shadow-sm overflow-hidden flex flex-col gap-3 md:gap-4">
+                {/* MOBILE FIX: Scaled the semester title text slightly */}
+                <h2 className="text-[#003366] text-lg md:text-xl font-bold font-['Calistoga'] border-b-2 border-gray-100 pb-2 md:pb-3">
                   {displayedTerm.semester}
                 </h2>
 
                 {/* MOBILE FIX: Slim Card Layout showing ONLY Title and Status */}
                 <div className="block lg:hidden">
-                  <div className="flex flex-col gap-3">
+                  {/* MOBILE FIX: Shrunk the gap between individual course cards */}
+                  <div className="flex flex-col gap-2">
                     {displayedTerm.courses.map((course, idx) => {
                       const savedRecord = userRecords.find(record => record.id === course.id);
                       const currentStatus = savedRecord && savedRecord.status !== 'pending' ? savedRecord.status : "pending";
                       const isPetitioned = savedRecord ? savedRecord.isPetitioned : false;
 
                       return (
-                        <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-between gap-4 shadow-sm">
-                          <span className="text-black font-bold font-['Inter'] text-sm leading-tight">
+                        // MOBILE FIX: Shrunk internal card padding and gap to keep the list compact
+                        <div key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between gap-3 shadow-sm">
+                          <span className="text-black font-bold font-['Inter'] text-xs leading-tight pr-2">
                             {course.title}
                           </span>
                           <div className="shrink-0">
