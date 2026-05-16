@@ -240,14 +240,27 @@ export const EditCoursesModal = ({ student, onClose }) => {
       <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         
         {/* Modal Header */}
-        <div className="p-6 lg:p-8 border-b border-gray-100 flex justify-between items-start shrink-0 bg-white">
-          <div className="flex-1 pr-6">
-            <h2 className="text-[#003366] text-2xl font-bold font-['Calistoga'] m-0">Edit Student Academic Record</h2>
-            <p className="text-gray-500 font-medium font-['Inter'] mt-1">
+        {/* MOBILE FIX: Reduced padding (p-4) to save screen real estate */}
+        <div className="p-4 md:p-6 lg:p-8 border-b border-gray-100 flex justify-between items-start shrink-0 bg-white">
+          
+          {/* MOBILE FIX: Reduced right padding so the title has more room before hitting the X button */}
+          <div className="flex-1 pr-3 lg:pr-6">
+            {/* MOBILE FIX: Scaled down heading to text-lg and tightened the line height */}
+            <h2 className="text-[#003366] text-lg md:text-xl lg:text-2xl font-bold font-['Calistoga'] m-0 leading-tight">
+              Edit Student Academic Record
+            </h2>
+            {/* MOBILE FIX: Shrunk the subtitle to text-xs */}
+            <p className="text-gray-500 font-medium font-['Inter'] text-xs md:text-sm mt-0.5 md:mt-1 leading-snug">
               {student.name} ({student.studentId || student.school_id}) - Year {student.yearLevel || student.year_standing}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors text-2xl shrink-0">
+
+          <button 
+            onClick={onClose} 
+            // MOBILE FIX: Slightly smaller close button, pushed up a tiny bit to align with the smaller heading
+            className="text-gray-400 hover:text-red-500 transition-colors text-xl lg:text-2xl shrink-0 p-1 -mt-1 md:mt-0"
+            aria-label="Close modal"
+          >
             ✕
           </button>
         </div>
@@ -263,26 +276,25 @@ export const EditCoursesModal = ({ student, onClose }) => {
           ) : (
             <>
               {/* THE HORIZONTAL TOGGLE UI */}
-              {/* THE HORIZONTAL TOGGLE UI */}
               <div className="flex flex-col gap-4 mb-6">
                 
                 <p className="text-gray-600 font-medium text-sm md:text-base m-0">
                   Click a course to cycle its status: <strong className="text-[#10B981]">Completed</strong> → <strong className="text-[#F59E0B]">Enrolled</strong> → <strong>Pending</strong>.
                 </p>
                 
-                <div className="flex flex-col-reverse lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
+                {/* MOBILE FIX: Years stacked on top of Semesters using flex-col, switching to flex-row on desktop */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
                   
-
-
-                  {/* YEAR TOGGLE (Right Side) */}
-                  <div className="flex flex-wrap lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit">
+                  {/* YEAR TOGGLE (Years First) */}
+                  {/* MOBILE FIX: grid-cols-2 forces a 2x2 grid on mobile, lg:flex returns it to a single row on desktop */}
+                  <div className="grid grid-cols-2 lg:flex lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit gap-1 lg:gap-0">
                     {[1, 2, 3, 4].map((year) => {
                       const yearLabel = year === 1 ? '1st Year' : year === 2 ? '2nd Year' : year === 3 ? '3rd Year' : '4th Year';
                       return (
                         <button
                           key={year}
                           onClick={() => handleYearChange(year)}
-                          className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                          className={`w-full px-2 lg:px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                             selectedYear === year ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                           }`}
                         >
@@ -291,13 +303,14 @@ export const EditCoursesModal = ({ student, onClose }) => {
                       );
                     })}
                   </div>
-                  {/* SEMESTER TOGGLE (Left Side) */}
+                  
+                  {/* SEMESTER TOGGLE (Semesters Second) */}
                   <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
                     {['1st', '2nd', ...(selectedYear === 2 ? ['Summer'] : [])].map((sem) => (
                       <button
                         key={sem}
                         onClick={() => setSelectedSemester(sem)}
-                        className={`flex-1 px-6 py-2 text-sm lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
+                        className={`flex-1 px-3 lg:px-6 py-2 text-xs lg:text-base font-bold rounded-full transition-all whitespace-nowrap ${
                           selectedSemester === sem ? 'bg-[#003366] text-white shadow-md' : 'text-[#003366] hover:bg-black/5'
                         }`}
                       >
@@ -306,91 +319,188 @@ export const EditCoursesModal = ({ student, onClose }) => {
                     ))}
                   </div>
 
-                  
-
                 </div>
               </div>
 
-              {/* Course Grid */}
+              {/* Course Layout (Table for Desktop / Slim List for Mobile) */}
               <div className="flex flex-col gap-6">
                 {filteredCurriculum.map((term, termIndex) => (
-                  <div key={termIndex} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center gap-3 mb-6 border-b-2 border-gray-100 pb-3">
-                      <div className="w-2 h-6 bg-[#003366] rounded-full"></div>
-                      <h4 className="text-[#003366] font-bold font-['Calistoga'] text-xl m-0">
+                  <section key={termIndex} className="w-full bg-white rounded-xl border border-stone-300 overflow-hidden shadow-sm">
+                    
+                    {/* Semester Header */}
+                    <div className="bg-slate-100 px-4 py-3 lg:px-6 lg:py-4 border-b border-stone-200 flex items-center gap-3">
+                      <div className="w-1.5 h-5 lg:w-2 lg:h-6 bg-[#003366] rounded-full"></div>
+                      <h4 className="text-[#003366] font-bold font-['Calistoga'] text-base lg:text-lg m-0">
                         {term.semester}
                       </h4>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {term.courses.map(course => {
-                        const dbId = getDbIdByCode(course.code);
-                        const status = dbId ? courseStatuses[dbId] : null;
-                        const isPetitioned = dbId ? petitionStatuses[dbId] : false;
-
-                        return (
-                          <div 
-                            key={course.code}
-                            onClick={() => handleToggleCourse(course.code)}
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 relative ${
-                              isPetitioned 
-                                ? 'bg-purple-50/60 border-purple-300 shadow-sm' 
-                                : status === 'passed' 
-                                  ? 'bg-[#10B981]/5 border-[#10B981] shadow-sm' 
-                                  : status === 'ongoing'
-                                    ? 'bg-[#F59E0B]/5 border-[#F59E0B] shadow-sm'
-                                    : 'bg-gray-50 border-gray-200 hover:border-[#003366]/40 hover:bg-white'
-                            }`}
-                          >
-                            <div className={`w-5 h-5 mt-0.5 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                              status === 'passed' ? 'bg-[#10B981] border-[#10B981]' : 
-                              status === 'ongoing' ? 'bg-[#F59E0B] border-[#F59E0B]' : 
-                              'border-gray-400 bg-white'
-                            }`}>
-                              {status === 'passed' && <span className="text-white text-xs font-bold">✓</span>}
-                              {status === 'ongoing' && <span className="text-white text-[10px] font-bold">⏳</span>}
-                            </div>
+                    {/* ==========================================
+                        MOBILE FIX: Slim List (Hidden on Desktop) 
+                        Shows ONLY: Description, Status, and Petition Star
+                    ========================================== */}
+                    <div className="block lg:hidden">
+                      {term.courses.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500 font-['Inter']">
+                          No courses found for this semester.
+                        </div>
+                      ) : (
+                        <div className="flex flex-col">
+                          {term.courses.map(course => {
+                            const dbId = getDbIdByCode(course.code);
+                            const status = dbId ? courseStatuses[dbId] : null;
+                            const isPetitioned = dbId ? petitionStatuses[dbId] : false;
                             
-                            <div className="flex-1 flex flex-col pr-2">
-                              <div className="flex justify-between items-start">
-                                <div className={`font-bold font-['Inter'] text-sm ${
-                                  isPetitioned ? 'text-purple-800' :
-                                  status === 'passed' ? 'text-[#10B981]' : 
-                                  status === 'ongoing' ? 'text-[#F59E0B]' : 
-                                  'text-gray-700'
-                                }`}>
-                                  {course.code}
-                                </div>
-                                <div className="text-gray-500 font-bold text-xs bg-gray-200/70 px-2 py-0.5 rounded">
-                                  {course.units}u
-                                </div>
-                              </div>
-                              <div className="text-gray-500 text-xs font-medium mt-1 leading-tight line-clamp-2">
-                                {course.title}
-                              </div>
-                              
-                              {/* PETITION BUTTON (Unlocked) */}
-                              <div className="mt-3 flex justify-start">
-                                <button
-                                  onClick={(e) => handleTogglePetition(e, course.code)}
-                                  className={`px-3 py-1.5 text-[10px] font-bold rounded-full border transition-all ${
-                                    isPetitioned 
-                                      ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700 shadow-sm' 
-                                      : 'bg-white text-purple-600 border-purple-200 hover:border-purple-600 hover:bg-purple-50 shadow-sm'
-                                  }`}
-                                >
-                                  {isPetitioned ? '★ Petitioned' : '+ Petition'}
-                                </button>
-                              </div>
+                            let rowClass = "transition-colors cursor-pointer border-b border-stone-200 p-4 flex items-center justify-between gap-3 ";
+                            
+                            if (isPetitioned) {
+                              rowClass += "bg-purple-100 hover:bg-purple-200"; 
+                            } else if (!status) {
+                              rowClass += "bg-white hover:bg-gray-50"; 
+                            } else if (status === 'passed') {
+                              rowClass += "bg-[#10B981]/15 hover:bg-[#10B981]/25"; 
+                            } else if (status === 'ongoing') {
+                              rowClass += "bg-[#F59E0B]/15 hover:bg-[#F59E0B]/25"; 
+                            }
 
-                            </div>
-                          </div>
-                        )
-                      })}
+                            return (
+                              <div 
+                                key={course.code} 
+                                onClick={() => handleToggleCourse(course.code)}
+                                className={rowClass}
+                              >
+                                {/* MOBILE FIX: Removed course.code, showing ONLY the title */}
+                                <span className={`font-['Caladea'] text-sm leading-tight flex-1 pr-2 ${isPetitioned ? 'text-purple-900 font-bold' : 'text-gray-800 font-bold'}`}>
+                                  {course.title}
+                                </span>
+
+                                {/* Status & Petition Star */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                  
+                                  {/* Status Badge */}
+                                  {!status ? (
+                                    <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full border border-gray-300 whitespace-nowrap">
+                                      Pending
+                                    </span>
+                                  ) : status === 'passed' ? (
+                                    <span className="text-[10px] font-bold text-[#10B981] bg-[#10B981]/20 px-2.5 py-1 rounded-full border border-[#10B981]/30 whitespace-nowrap">
+                                      ✓ Completed
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-bold text-[#F59E0B] bg-[#F59E0B]/20 px-2.5 py-1 rounded-full border border-[#F59E0B]/30 whitespace-nowrap">
+                                      ⏳ Enrolled
+                                    </span>
+                                  )}
+
+                                  {/* Petition Star Button */}
+                                  <button
+                                    onClick={(e) => handleTogglePetition(e, course.code)}
+                                    className={`w-7 h-7 flex items-center justify-center text-sm font-bold rounded-full border transition-all shadow-sm shrink-0 ${
+                                      isPetitioned 
+                                        ? 'bg-purple-600 text-white border-purple-600 active:scale-95' 
+                                        : 'bg-white text-purple-600 border-purple-200 active:scale-95'
+                                    }`}
+                                  >
+                                    {isPetitioned ? '★' : '+'}
+                                  </button>
+                                  
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
+
+                    {/* ==========================================
+                        DESKTOP VIEW: Full Table (Hidden on Mobile)
+                    ========================================== */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="w-full text-left border-collapse min-w-[900px]">
+                        <thead>
+                          <tr className="bg-slate-50 text-[#003366] border-b-2 border-stone-300 font-['Calistoga'] text-sm lg:text-base">
+                            <th className="py-2 px-4 w-12 text-center">#</th>
+                            <th className="py-2 px-4 w-36 whitespace-nowrap">Course Code</th>
+                            <th className="py-2 px-4">Description</th>
+                            <th className="py-2 px-4 w-20 text-center">Units</th>
+                            <th className="py-2 px-4 w-32 text-center">Status</th>
+                            <th className="py-2 px-4 w-36 text-center">Petition Credits</th> 
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {term.courses.length === 0 ? (
+                            <tr>
+                              <td colSpan="6" className="p-8 text-center text-gray-500 font-['Inter']">
+                                No courses found for this semester.
+                              </td>
+                            </tr>
+                          ) : (
+                            term.courses.map((course, index) => {
+                              const dbId = getDbIdByCode(course.code);
+                              const status = dbId ? courseStatuses[dbId] : null;
+                              const isPetitioned = dbId ? petitionStatuses[dbId] : false;
+                              
+                              let rowClass = "transition-colors cursor-pointer border-b border-stone-200 ";
+                              
+                              if (isPetitioned) {
+                                rowClass += "bg-purple-100 hover:bg-purple-200 border-purple-200"; 
+                              } else if (!status) {
+                                rowClass += "bg-white hover:bg-gray-50"; 
+                              } else if (status === 'passed') {
+                                rowClass += "bg-[#10B981]/15 hover:bg-[#10B981]/25 border-[#10B981]/20"; 
+                              } else if (status === 'ongoing') {
+                                rowClass += "bg-[#F59E0B]/15 hover:bg-[#F59E0B]/25 border-[#F59E0B]/20"; 
+                              }
+
+                              return (
+                                <tr 
+                                  key={course.code} 
+                                  onClick={() => handleToggleCourse(course.code)}
+                                  className={rowClass}
+                                >
+                                  <td className={`py-3 px-4 text-center font-bold ${isPetitioned ? 'text-purple-600' : 'text-gray-500'}`}>{index + 1}</td>
+                                  <td className={`py-3 px-4 font-bold whitespace-nowrap ${isPetitioned ? 'text-purple-900' : 'text-[#003366]'}`}>{course.code}</td>
+                                  <td className={`py-3 px-4 font-['Caladea'] ${isPetitioned ? 'text-purple-900 font-medium' : 'text-gray-800'}`}>{course.title}</td>
+                                  <td className="py-3 px-4 text-center font-bold text-gray-700">{course.units}</td>
+                                  <td className="py-3 px-4 text-center">
+                                    {!status ? (
+                                      <span className="whitespace-nowrap inline-block text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
+                                        Pending
+                                      </span>
+                                    ) : status === 'passed' ? (
+                                      <span className="whitespace-nowrap inline-block text-sm font-bold text-[#10B981] bg-[#10B981]/20 px-3 py-1 rounded-full border border-[#10B981]/30">
+                                        ✓ Completed
+                                      </span>
+                                    ) : (
+                                      <span className="whitespace-nowrap inline-block text-sm font-bold text-[#F59E0B] bg-[#F59E0B]/20 px-3 py-1 rounded-full border border-[#F59E0B]/30">
+                                        ⏳ Enrolled
+                                      </span>
+                                    )}
+                                  </td>
+                                  
+                                  <td className="py-3 px-4 text-center">
+                                    <button
+                                      onClick={(e) => handleTogglePetition(e, course.code)}
+                                      className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all shadow-sm whitespace-nowrap ${
+                                        isPetitioned 
+                                          ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700' 
+                                          : 'bg-white text-purple-600 border-purple-200 hover:border-purple-600 hover:bg-purple-50'
+                                      }`}
+                                    >
+                                      {isPetitioned ? '★ Petitioned' : '+ Petition'}
+                                    </button>
+                                  </td>
+
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
                 ))}
-                
+
                 {filteredCurriculum.length === 0 && (
                   <div className="text-center py-10 bg-white border border-dashed border-gray-300 rounded-2xl">
                     <p className="text-gray-500 font-medium font-['Inter']">
@@ -404,21 +514,26 @@ export const EditCoursesModal = ({ student, onClose }) => {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-6 border-t border-gray-100 bg-white flex justify-end gap-4 shrink-0 z-10">
+        {/* MOBILE FIX: Shrunk padding (p-4 lg:p-6) and gap (gap-2 lg:gap-4) */}
+        <div className="p-4 lg:p-6 border-t border-gray-100 bg-white flex justify-end gap-2 lg:gap-4 shrink-0 z-10">
           <button 
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold font-['Inter'] hover:bg-gray-50 transition-colors"
+            // MOBILE FIX: Tighter padding, smaller text, and smaller rounded corners on phones
+            className="px-4 py-2 lg:px-6 lg:py-2.5 rounded-lg lg:rounded-xl border border-gray-300 text-gray-700 font-bold font-['Inter'] text-sm lg:text-base hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button 
             onClick={handleSaveCourses}
             disabled={isLoading}
-            className={`px-8 py-2.5 rounded-xl text-white font-bold font-['Inter'] shadow-md transition-all flex items-center gap-2 ${
+            className={`px-5 py-2 lg:px-8 lg:py-2.5 rounded-lg lg:rounded-xl text-white font-bold font-['Inter'] text-sm lg:text-base shadow-md transition-all flex items-center justify-center gap-1.5 lg:gap-2 ${
               isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003366] hover:bg-[#002244]'
             }`}
           >
-            <span>💾</span> Save Academic Record
+            <span>💾</span>
+            {/* MOBILE FIX: Just say "Save" on phones, full text on desktop */}
+            <span className="md:hidden">Save</span>
+            <span className="hidden md:inline">Save Academic Record</span>
           </button>
         </div>
 
