@@ -483,13 +483,17 @@ app.put('/api/students/:id', async (req, res) => {
 });
 
 
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+
 
 app.use(cors());
 app.use(express.json());
+// Require Resend at the top
+const { Resend } = require('resend');
+const crypto = require('crypto');
 
-// POST /api/forgot-password
+// Initialize it with your API key
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
   console.log(`[Forgot Password] Starting request for: ${email}`);
@@ -498,7 +502,6 @@ app.post('/api/forgot-password', async (req, res) => {
     const userRes = await pool.query('SELECT id, first_name FROM users WHERE email = $1', [email]);
     
     if (userRes.rows.length === 0) {
-      console.log("[Forgot Password] Email not found in database.");
       return res.status(404).json({ message: "We couldn't find an account with that email." });
     }
 
@@ -506,31 +509,20 @@ app.post('/api/forgot-password', async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const tokenExpiry = new Date(Date.now() + 3600000); 
 
-    console.log("[Forgot Password] User found. Updating database with reset token...");
     await pool.query(
       'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
       [resetToken, tokenExpiry, email]
     );
 
-    console.log("[Forgot Password] Database updated. Preparing email...");
-    // 🚨 THE FIX: Explicitly define the host and port instead of using 'service'
-
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // Must be false for port 587
-      requireTLS: true, // Forces encryption
-      auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS  
-      }
-    });
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendURL}/reset-password/${resetToken}`;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
+    console.log("[Forgot Password] Sending request via Resend API...");
+    
+    // ✅ THE FIX: Fire off the email using Resend
+    const { data, error } = await resend.emails.send({
+      from: 'CourseTrackr <onboarding@resend.dev>', // Resend gives you this testing email for free!
+      to: email, // Your Gmail address (must be the same one you used to sign up for Resend while testing)
       subject: 'CourseTrackr: Password Reset Request',
       html: `
         <h3>Hi ${user.first_name},</h3>
@@ -538,16 +530,18 @@ app.post('/api/forgot-password', async (req, res) => {
         <a href="${resetLink}" style="padding: 10px 20px; background-color: #003366; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Reset Password</a>
         <p style="margin-top: 20px; font-size: 12px; color: gray;">This link will expire in 1 hour. If you did not request this, please ignore this email.</p>
       `
-    };
+    });
 
-    console.log("[Forgot Password] Attempting to send email via Gmail...");
-    await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error("[Forgot Password] Resend API Error:", error);
+      return res.status(500).json({ message: "An error occurred while sending the email." });
+    }
     
     console.log("[Forgot Password] Email sent successfully!");
     return res.status(200).json({ message: "Password reset email sent!" });
 
-  } catch (error) {
-    console.error("[Forgot Password] FATAL ERROR:", error);
+  } catch (err) {
+    console.error("[Forgot Password] FATAL ERROR:", err);
     return res.status(500).json({ message: "An error occurred while sending the email." });
   }
 });
