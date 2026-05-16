@@ -165,10 +165,27 @@ export const LogInPageStudent = () => {
           </button>
         </form>
 
-        <div className="text-center mt-6">
-        <p className="text-[12px] text-gray-500 font-medium">
-        Need help? Contact <a href="mailto:lim.joshelly@gmail.com" className="text-[#003366] hover:underline font-bold">admin@cpe.com</a>
-        </p>
+        {/* ✅ THE FIX: Grouped the "Need help?" text and the new links together safely at the bottom */}
+        <div className="text-center mt-6 flex flex-col gap-2">
+          <p className="text-[12px] text-gray-500 font-medium font-['Inter']">
+            Need help? Contact <a href="mailto:lim.joshelly@gmail.com" className="text-[#003366] hover:underline font-bold">admin@cpe.com</a>
+          </p>
+          
+          <div className="flex items-center justify-center gap-4">
+            <button 
+              onClick={() => navigate('/about')}
+              className="text-gray-500 hover:text-[#003366] text-[12px] font-semibold font-['Inter'] transition-colors"
+            >
+              About Us
+            </button>
+            <span className="text-gray-300 text-[12px]">|</span>
+            <button 
+              onClick={() => navigate('/privacy')}
+              className="text-gray-500 hover:text-[#003366] text-[12px] font-semibold font-['Inter'] transition-colors"
+            >
+              Privacy Policy
+            </button>
+          </div>
         </div>
         
       </div>

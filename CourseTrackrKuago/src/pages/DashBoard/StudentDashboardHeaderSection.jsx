@@ -51,33 +51,31 @@ export const StudentDashboardHeaderSection = () => {
       <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between px-3 md:px-6 h-full gap-2">
         
         {/* ==============================
-            ZONE 1: LOGO (Left)
+            LEFT SIDE: LOGO + NAVIGATION
         ============================== */}
-        <div 
-          className="flex items-center cursor-pointer shrink-0" 
-          onClick={() => navigate('/dashboard')}
-        >
-          <img 
-            src="/logo.svg" 
-            alt="Logo" 
-            className="w-8 h-8 md:w-14 md:h-14 drop-shadow-lg" 
-          />
-          {/* TEXT: Now visible on mobile with properly scaled responsive sizes */}
-          <div className="flex flex-col justify-center ml-1 md:ml-2">
-            <h1 className="text-[14px] md:text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
-              COURSETRACKR
-            </h1>
-            <h2 className="text-[8px] md:text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 md:mt-0.5 whitespace-nowrap">
-              Academic Management Tool
-            </h2>
-          </div>
-        </div>
-
-        {/* ==============================
-            ZONE 2: NAVIGATION (Center)
-        ============================== */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-3 md:gap-8 lg:gap-12">
           
+          {/* LOGO */}
+          <div 
+            className="flex items-center cursor-pointer shrink-0" 
+            onClick={() => navigate('/dashboard')}
+          >
+            <img 
+              src="/logo.svg" 
+              alt="Logo" 
+              className="w-8 h-8 md:w-14 md:h-14 drop-shadow-lg" 
+            />
+            <div className="flex flex-col justify-center ml-1 md:ml-2">
+              <h1 className="text-[14px] md:text-[22px] lg:text-[26px] xl:text-[30px] font-bold text-white leading-none font-['Calistoga'] m-0 tracking-tight">
+                COURSETRACKR
+              </h1>
+              <h2 className="text-[8px] md:text-[12px] lg:text-[14px] xl:text-[16px] text-[#FFCC00] font-['Calistoga'] m-0 md:mt-0.5 whitespace-nowrap">
+                Academic Management Tool
+              </h2>
+            </div>
+          </div>
+
+          {/* NAVIGATION (The Toggle) */}
           <div className="flex p-1 bg-black/20 rounded-xl md:rounded-2xl border border-white/10 backdrop-blur-sm gap-1 md:gap-2">
             
             {/* DASHBOARD BUTTON */}
@@ -147,27 +145,10 @@ export const StudentDashboardHeaderSection = () => {
             </button>
 
           </div>
-
-          {/* Text Links (About, Privacy) - Safely hidden away on mobile screens */}
-          <div className="hidden xl:flex items-center gap-6 ml-6 border-l border-white/20 pl-6">
-            <button 
-              onClick={() => navigate('/about')}
-              className="text-gray-300 hover:text-white text-sm font-semibold font-['Inter'] transition-colors"
-            >
-              About Us
-            </button>
-            <button 
-              onClick={() => navigate('/privacy')}
-              className="text-gray-300 hover:text-white text-sm font-semibold font-['Inter'] transition-colors"
-            >
-              Privacy Policy
-            </button>
-          </div>
-
         </div>
 
         {/* ==============================
-            ZONE 3: LOGOUT (Right)
+            RIGHT SIDE: USER INFO + LOGOUT
         ============================== */}
         <div className="flex items-center gap-2 md:gap-4 lg:gap-6 shrink-0">
           
