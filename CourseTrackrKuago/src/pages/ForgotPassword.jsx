@@ -41,12 +41,14 @@ export const ForgotPassword = () => {
       <button 
         type="button"
         onClick={() => navigate('/')} 
-        className="group absolute top-6 left-6 lg:top-10 lg:left-10 flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 bg-gray-50 border border-gray-200 text-[#003366] rounded-full hover:bg-[#003366] hover:text-[#FFCC00] hover:border-[#003366] hover:shadow-md transition-all duration-300 z-50"
+        // MOBILE FIX: Shrunk to absolute minimum sizes for phones, pushed to very top-left corner (top-3 left-3).
+        className="group absolute top-3 left-3 sm:top-4 sm:left-4 md:top-6 md:left-6 lg:top-10 lg:left-10 flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2.5 py-1.5 sm:px-3 md:px-4 md:py-2 lg:px-5 lg:py-2.5 bg-gray-50 border border-gray-200 text-[#003366] rounded-full hover:bg-[#003366] hover:text-[#FFCC00] hover:border-[#003366] hover:shadow-md transition-all duration-300 z-50"
         aria-label="Back to Login"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-300 group-hover:-translate-x-1" 
+          // MOBILE FIX: Tiny 12px icon on phones, standard size on desktop
+          className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 transition-transform duration-300 group-hover:-translate-x-1" 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor" 
@@ -54,7 +56,8 @@ export const ForgotPassword = () => {
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        <span className="font-bold font-['Inter'] text-sm lg:text-base tracking-wide">Back</span>
+        {/* MOBILE FIX: Tiny text on phones, standard size on desktop */}
+        <span className="font-bold font-['Inter'] text-[10px] sm:text-xs md:text-sm lg:text-base tracking-wide">Back</span>
       </button>
 
       <div className="w-full max-w-[440px]">
