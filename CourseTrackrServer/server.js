@@ -512,18 +512,17 @@ app.post('/api/forgot-password', async (req, res) => {
 
     console.log("[Forgot Password] Database updated. Preparing email...");
     // 🚨 THE FIX: Explicitly define the host and port instead of using 'service'
+
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Use SSL/TLS
+      port: 587,
+      secure: false, // Must be false for port 587
+      requireTLS: true, // Forces encryption
       auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
-      },
-      // This forces Nodemailer to wait a bit longer before throwing a timeout error
-      connectionTimeout: 10000, 
+      }
     });
-
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendURL}/reset-password/${resetToken}`;
 
