@@ -490,73 +490,13 @@ app.use(express.json());
 // POST /api/forgot-password
 app.post('/api/forgot-password', async (req, res) => {
   const { email } = req.body;
-
-  try {
-    // 1. Check if the user exists
-    const userRes = await pool.query('SELECT id, first_name FROM users WHERE email = $1', [email]);
-    
-    if (userRes.rows.length === 0) {
-      return res.status(404).json({ message: "We couldn't find an account with that email." });
-    }
-
-    const user = userRes.rows[0];
-
-    // 2. Generate a secure, random token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpiry = new Date(Date.now() + 3600000); // Token expires in 1 hour
-
-    // 3. Save token to database (You'll need to add these two columns to your users table!)
-    await pool.query(
-      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
-      [resetToken, tokenExpiry, email]
-    );
-
-    // 4. Set up Nodemailer to use your Gmail
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'joshellicious@gmail.com', // 👈 Type your real email here inside the quotes
-        pass: 'zkgmgoagtjemqvtc'             // 👈 Type your real 16-letter App Password here
-      }
-    });
-
-    // 5. Create the reset link pointing to your React frontend
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
-
-    // 6. Send the email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Password Reset Request',
-      html: `
-        <h3>Hi ${user.first_name},</h3>
-        <p>You requested a password reset. Click the link below to set a new password:</p>
-        <a href="${resetLink}" style="padding: 10px 20px; background-color: #003366; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Reset Password</a>
-        <p style="margin-top: 20px; font-size: 12px; color: gray;">This link will expire in 1 hour. If you did not request this, please ignore this email.</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ message: "Password reset email sent!" });
-
-  } catch (error) {
-    console.error("Forgot Password Error:", error);
-    res.status(500).json({ message: "An error occurred while sending the email." });
-  }
-});
-
-
-// POST /api/reset-password
-// POST /api/reset-password
-// POST /api/forgot-password
-app.post('/api/forgot-password', async (req, res) => {
-  const { email } = req.body;
+  console.log(`[Forgot Password] Starting request for: ${email}`);
 
   try {
     const userRes = await pool.query('SELECT id, first_name FROM users WHERE email = $1', [email]);
     
     if (userRes.rows.length === 0) {
+      console.log("[Forgot Password] Email not found in database.");
       return res.status(404).json({ message: "We couldn't find an account with that email." });
     }
 
@@ -564,21 +504,26 @@ app.post('/api/forgot-password', async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const tokenExpiry = new Date(Date.now() + 3600000); 
 
+    console.log("[Forgot Password] User found. Updating database with reset token...");
     await pool.query(
       'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
       [resetToken, tokenExpiry, email]
     );
 
-    // ✅ FIX 1: Using secure environment variables instead of hardcoded text
+    console.log("[Forgot Password] Database updated. Preparing email...");
+    // 🚨 THE FIX: Explicitly define the host and port instead of using 'service'
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // Use SSL/TLS
       auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
-      }
+      },
+      // This forces Nodemailer to wait a bit longer before throwing a timeout error
+      connectionTimeout: 10000, 
     });
 
-    // ✅ FIX 2: Dynamically routing to Vercel in production, or localhost during testing
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendURL}/reset-password/${resetToken}`;
 
@@ -594,13 +539,15 @@ app.post('/api/forgot-password', async (req, res) => {
       `
     };
 
+    console.log("[Forgot Password] Attempting to send email via Gmail...");
     await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ message: "Password reset email sent!" });
+    
+    console.log("[Forgot Password] Email sent successfully!");
+    return res.status(200).json({ message: "Password reset email sent!" });
 
   } catch (error) {
-    console.error("Forgot Password Error:", error);
-    res.status(500).json({ message: "An error occurred while sending the email." });
+    console.error("[Forgot Password] FATAL ERROR:", error);
+    return res.status(500).json({ message: "An error occurred while sending the email." });
   }
 });
 
