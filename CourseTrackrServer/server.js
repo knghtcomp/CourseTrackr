@@ -1,6 +1,7 @@
+const bcrypt = require('bcrypt');
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
-const bcrypt = require('bcrypt');
+
 require('dotenv').config(); // This loads your .env file
 const express = require('express');
 const cors = require('cors');
@@ -570,9 +571,10 @@ app.post('/api/reset-password', async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    // 3. Update the password AND clear out the token so it can't be used again
+    // 3. Update the password_hash AND clear out the token so it can't be used again
+    // ✅ THE FIX: Changed 'password' to 'password_hash'
     await pool.query(
-      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
       [hashedPassword, userId]
     );
 
