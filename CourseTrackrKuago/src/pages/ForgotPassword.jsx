@@ -14,13 +14,27 @@ export const ForgotPassword = () => {
     setMessage("");
 
     try {
+      // 🚨 FRONTEND FIX: Add a 10-second timeout controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
+        signal: controller.signal // Link the timeout to the fetch
       });
 
-      const data = await response.json();
+      clearTimeout(timeoutId); // Clear the timeout if the server responds in time!
+
+      // Safely parse the response (just in case the server crashes and sends HTML text instead of JSON)
+      const contentType = response.headers.get("content-type");
+      let data = {};
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        data.message = await response.text();
+      }
 
       if (response.ok) {
         alert(`Success! A password reset link has been sent to ${email}`);
@@ -30,9 +44,14 @@ export const ForgotPassword = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessage("Could not connect to the server.");
+      // Let the user know exactly WHY it failed
+      if (error.name === 'AbortError') {
+        setMessage("Request timed out. The server took too long to respond.");
+      } else {
+        setMessage("Could not connect to the server. Please check your internet or server connection.");
+      }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // This will now ALWAYS run!
     }
   };
 
