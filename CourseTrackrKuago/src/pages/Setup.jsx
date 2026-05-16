@@ -302,34 +302,41 @@ const prereqCheck = checkPrereqs(course);
 
       <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[90px] mt-6 flex flex-col gap-6">
 
-        <section className="w-full bg-gradient-to-r from-[#001A33] to-[#004080] rounded-xl p-5 lg:p-6 flex flex-col md:flex-row items-center justify-between shadow-md text-center md:text-left">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-white text-2xl lg:text-3xl font-normal font-['Calistoga'] m-0 drop-shadow-sm">
+        {/* 1. Select Courses Banner */}
+        {/* MOBILE FIX: Changed to flex-row on mobile to save vertical space, shrunk paddings and text sizes */}
+        <section className="w-full bg-gradient-to-r from-[#001A33] to-[#004080] rounded-xl p-4 lg:p-6 flex flex-row items-center justify-between shadow-md text-left gap-2">
+          <div className="flex flex-col gap-0.5 lg:gap-1">
+            <h2 className="text-white text-lg md:text-2xl lg:text-3xl font-normal font-['Calistoga'] m-0 drop-shadow-sm leading-tight">
               Select Courses
             </h2>
-            <p className="text-gray-200 text-base lg:text-lg font-light font-['Fjord'] m-0">
-              You have completed <strong className="text-[#FFCC00]">{completedCoursesCount}</strong> courses totaling <strong className="text-[#FFCC00]">{completedUnits}</strong> units
+            <p className="text-gray-200 text-xs md:text-base lg:text-lg font-light font-['Fjord'] m-0 leading-snug">
+              <span className="hidden md:inline">You have completed </span>
+              <strong className="text-[#FFCC00]">{completedCoursesCount}</strong> courses 
+              <span className="md:hidden"> done </span>
+              <span className="hidden md:inline"> totaling </span> 
+              (<strong className="text-[#FFCC00]">{completedUnits}</strong> units)
             </p>
           </div>
-          <div className="mt-4 md:mt-0 text-center">
-            <span className="text-[#FFCC00] text-5xl lg:text-6xl font-extrabold font-['Inter'] leading-none drop-shadow-md">
+          <div className="text-right shrink-0">
+            <span className="text-[#FFCC00] text-3xl md:text-5xl lg:text-6xl font-extrabold font-['Inter'] leading-none drop-shadow-md">
               {completedCoursesCount}
             </span>
           </div>
         </section>
 
         {/* 2. Standing Year Selection */}
-        <section className="w-full bg-white rounded-xl border border-gray-200 p-5 lg:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shadow-sm">
-          <div>
-            <h3 className="text-[#003366] text-lg lg:text-xl font-bold font-['Calistoga'] m-0">
+        {/* MOBILE FIX: Reduced padding, tightened gap, shrunk font sizes and input height */}
+        <section className="w-full bg-white rounded-xl border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 lg:gap-4 shadow-sm">
+          <div className="flex-1">
+            <h3 className="text-[#003366] text-base md:text-lg lg:text-xl font-bold font-['Calistoga'] m-0 leading-tight">
               Current Year Standing
             </h3>
-            <p className="text-gray-500 font-medium font-['Inter'] text-sm mt-1">
+            <p className="text-gray-500 font-medium font-['Inter'] text-xs md:text-sm mt-0.5 md:mt-1 leading-snug">
               Select your current academic level to help us personalize your track.
             </p>
           </div>
 
-          <div className="relative w-full lg:w-48">
+          <div className="relative w-full md:w-48 shrink-0">
             <select
               value={yearStanding}
               onChange={(e) => {
@@ -337,7 +344,7 @@ const prereqCheck = checkPrereqs(course);
                 setYearStanding(val);
                 setViewYear(val); 
               }}
-              className="w-full appearance-none bg-gray-50 border border-gray-200 text-[#003366] font-bold font-['Inter'] text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] cursor-pointer shadow-sm"
+              className="w-full appearance-none bg-gray-50 border border-gray-200 text-[#003366] font-bold font-['Inter'] text-xs md:text-sm py-2 md:py-2.5 px-3 md:px-4 pr-8 md:pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366] cursor-pointer shadow-sm"
             >
               {[1, 2, 3, 4, 5].map(year => (
                 <option key={year} value={year}>
@@ -345,8 +352,8 @@ const prereqCheck = checkPrereqs(course);
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#003366]">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 md:px-4 text-[#003366]">
+              <svg className="fill-current h-3 w-3 md:h-4 md:w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
               </svg>
             </div>
@@ -391,7 +398,90 @@ const prereqCheck = checkPrereqs(course);
 
         {/* 4. Table Layout for Courses */}
         <section className="w-full bg-white rounded-xl border border-stone-300 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+          
+          {/* ==========================================
+              MOBILE FIX: Slim List (Hidden on Desktop) 
+              Shows ONLY: Description, Status, and Star
+          ========================================== */}
+          <div className="block lg:hidden">
+            {filteredCurriculum.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 font-['Inter']">
+                No courses found for this semester.
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                {filteredCurriculum.flatMap(sem => sem.courses).map((course, index) => {
+                  const isSelected = selectedCourses.find(c => c.id === course.id);
+                  const isPetitioned = isSelected?.isPetitioned || false;
+                  
+                  let rowClass = "transition-colors cursor-pointer border-b border-stone-200 p-4 flex items-center justify-between gap-3 ";
+                  
+                  if (isPetitioned) {
+                    rowClass += "bg-purple-100 hover:bg-purple-200"; 
+                  } else if (!isSelected) {
+                    rowClass += "bg-white hover:bg-gray-50"; 
+                  } else if (isSelected.status === 'passed') {
+                    rowClass += "bg-[#10B981]/15 hover:bg-[#10B981]/25"; 
+                  } else if (isSelected.status === 'ongoing') {
+                    rowClass += "bg-[#F59E0B]/15 hover:bg-[#F59E0B]/25"; 
+                  }
+
+                  return (
+                    <div 
+                      key={course.id} 
+                      onClick={() => toggleCourse(course)}
+                      className={rowClass}
+                    >
+                      {/* Description (Title) */}
+                      <span className={`font-['Caladea'] text-sm leading-tight flex-1 pr-2 ${isPetitioned ? 'text-purple-900 font-bold' : 'text-gray-800 font-bold'}`}>
+                        {course.title}
+                      </span>
+
+                      {/* Status & Petition Star */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        
+                        {/* Status Badge */}
+                        {!isSelected ? (
+                          <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full border border-gray-300 whitespace-nowrap">
+                            Pending
+                          </span>
+                        ) : isSelected.status === 'passed' ? (
+                          <span className="text-[10px] font-bold text-[#10B981] bg-[#10B981]/20 px-2.5 py-1 rounded-full border border-[#10B981]/30 whitespace-nowrap">
+                            ✓ Completed
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-[#F59E0B] bg-[#F59E0B]/20 px-2.5 py-1 rounded-full border border-[#F59E0B]/30 whitespace-nowrap">
+                            ⏳ Enrolled
+                          </span>
+                        )}
+
+                        {/* Petition Star Button (Icon Only) */}
+                        <button
+                          onClick={(e) => togglePetition(course, e)}
+                          disabled={!isSelected} 
+                          className={`w-7 h-7 flex items-center justify-center text-sm font-bold rounded-full border transition-all shadow-sm shrink-0 ${
+                            !isSelected 
+                              ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                              : isPetitioned 
+                                ? 'bg-purple-600 text-white border-purple-600 active:scale-95' 
+                                : 'bg-white text-purple-600 border-purple-200 active:scale-95'
+                          }`}
+                        >
+                          {isPetitioned ? '★' : '+'}
+                        </button>
+                        
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ==========================================
+              DESKTOP VIEW: Full Table (Hidden on Mobile)
+          ========================================== */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
                 <tr className="bg-slate-100 text-[#003366] border-b-2 border-stone-300 font-['Calistoga'] text-base">
@@ -479,36 +569,48 @@ const prereqCheck = checkPrereqs(course);
                 )}
               </tbody>
             </table>
-
           </div>
         </section>
 
       </div>
 
       {/* Floating Bottom Bar */}
-      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-stone-300 p-4 lg:p-6 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50">
-        <div className="w-full max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-2 lg:px-[90px]">
+      {/* MOBILE FIX: Reduced padding (p-3 md:p-4) to make the bar much shorter */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-stone-300 p-3 md:p-4 lg:p-6 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50">
+        {/* MOBILE FIX: Forced flex-row so everything stays on exactly ONE line */}
+        <div className="w-full max-w-[1440px] mx-auto flex flex-row items-center justify-between gap-2 px-1 lg:px-[90px]">
           
-          <div className="text-black/70 text-base lg:text-lg font-['Caladea']">
-            {enrolledCoursesCount === 0 
-              ? "0 Courses Currently Enrolled" 
-              : `${enrolledCoursesCount} Courses Currently Enrolled`} 
-            <span className="hidden md:inline mx-2">|</span> 
-            <span className="font-bold text-[#003366] block md:inline mt-1 md:mt-0">Standing: Year {yearStanding}</span>
+          <div className="text-black/70 text-[11px] sm:text-xs lg:text-lg font-['Caladea'] whitespace-nowrap shrink overflow-hidden text-ellipsis">
+            {/* MOBILE VIEW: Ultra-short text so it fits perfectly */}
+            <span className="md:hidden font-bold">
+              {enrolledCoursesCount} Enrolled | Yr {yearStanding}
+            </span>
+            
+            {/* DESKTOP VIEW: Your original full text */}
+            <span className="hidden md:inline">
+              {enrolledCoursesCount === 0 
+                ? "0 Courses Currently Enrolled" 
+                : `${enrolledCoursesCount} Courses Currently Enrolled`} 
+              <span className="mx-2">|</span> 
+              <span className="font-bold text-[#003366]">Standing: Year {yearStanding}</span>
+            </span>
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={() => navigate('/dashboard')}
-              className="flex-1 md:flex-none px-6 py-2.5 rounded-xl border border-stone-300 text-black font-['Caladea'] hover:bg-gray-50 transition-colors"
+              // MOBILE FIX: Shrunk text size to xs, tightened padding, smaller rounded corners
+              className="px-3 py-1.5 md:px-6 md:py-2.5 rounded-lg md:rounded-xl border border-stone-300 text-black font-['Caladea'] text-xs md:text-base hover:bg-gray-50 transition-colors"
             >
               Skip
             </button>
             <button 
               onClick={handleSaveSetup} 
-              className="flex-1 md:flex-none px-8 py-2.5 rounded-xl bg-[#003366] text-white font-['Caladea'] hover:bg-[#002244] hover:shadow-lg transition-all"
+              // MOBILE FIX: Shrunk text to "Save" on phones, tighter padding
+              className="px-4 py-1.5 md:px-8 md:py-2.5 rounded-lg md:rounded-xl bg-[#003366] text-white font-['Caladea'] text-xs md:text-base hover:bg-[#002244] hover:shadow-lg transition-all"
             >
-              Complete SetUp
+              <span className="md:hidden">Save</span>
+              <span className="hidden md:inline">Complete SetUp</span>
             </button>
           </div>
 

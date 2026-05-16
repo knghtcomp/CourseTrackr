@@ -95,7 +95,7 @@ export const DashBoard = () => {
 
         {/* Stats */}
         <section aria-label="Dashboard statistics">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
             <CompletedCoursesStatsSection count={completedCount} />
             <OngoingCoursesStatsSection count={ongoingCount} />
             <UnitsCompletedStatsSection count={unitsCompletedCount} />
