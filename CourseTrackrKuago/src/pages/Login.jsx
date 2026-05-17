@@ -171,19 +171,33 @@ export const LogInPageStudent = () => {
             Need help? Contact <a href="mailto:lim.joshelly@gmail.com" className="text-[#003366] hover:underline font-bold">admin@cpe.com</a>
           </p>
           
-          <div className="flex items-center justify-center gap-4">
+          {/* MOBILE FIX: Added flex-wrap and gap-y-2 so if the screen is super narrow, it wraps gracefully instead of breaking the page. */}
+          <div className="flex flex-wrap items-center justify-center gap-x-2 md:gap-x-4 gap-y-1">
             <button 
               onClick={() => navigate('/about')}
-              className="text-gray-500 hover:text-[#003366] text-[12px] font-semibold font-['Inter'] transition-colors"
+              // MOBILE FIX: Scaled text down to 10px on phones, returns to 12px on desktop
+              className="text-gray-500 hover:text-[#003366] text-[10px] md:text-[12px] font-semibold font-['Inter'] transition-colors"
             >
               About Us
             </button>
-            <span className="text-gray-300 text-[12px]">|</span>
+            
+            <span className="text-gray-300 text-[10px] md:text-[12px]">|</span>
+            
             <button 
               onClick={() => navigate('/privacy')}
-              className="text-gray-500 hover:text-[#003366] text-[12px] font-semibold font-['Inter'] transition-colors"
+              className="text-gray-500 hover:text-[#003366] text-[10px] md:text-[12px] font-semibold font-['Inter'] transition-colors"
             >
               Privacy Policy
+            </button>
+            
+            <span className="text-gray-300 text-[10px] md:text-[12px]">|</span>
+            
+            <button
+              onClick={() => navigate('/terms')}
+              className="text-gray-500 hover:text-[#003366] text-[10px] md:text-[12px] font-semibold font-['Inter'] transition-colors"
+            >
+              {/* MOBILE FIX: Swapped "And" for "&" to save horizontal space on small screens */}
+              Terms & Conditions
             </button>
           </div>
         </div>

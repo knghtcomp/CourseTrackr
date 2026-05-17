@@ -287,6 +287,7 @@ const prereqCheck = checkPrereqs(course);
   }
 
   // -- MAIN RENDER --
+  // -- MAIN RENDER --
   return (
     <main className="flex flex-col w-full min-h-screen bg-white font-sans pb-32">
       
@@ -300,10 +301,10 @@ const prereqCheck = checkPrereqs(course);
         </h1>
       </header>
 
-      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[90px] mt-6 flex flex-col gap-6">
+      {/* 🚨 THE FIX: Reduced gap-6 to gap-4 md:gap-5 to pull all the cards closer together! */}
+      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-[90px] mt-4 flex flex-col gap-4 md:gap-5">
 
         {/* 1. Select Courses Banner */}
-        {/* MOBILE FIX: Changed to flex-row on mobile to save vertical space, shrunk paddings and text sizes */}
         <section className="w-full bg-gradient-to-r from-[#001A33] to-[#004080] rounded-xl p-4 lg:p-6 flex flex-row items-center justify-between shadow-md text-left gap-2">
           <div className="flex flex-col gap-0.5 lg:gap-1">
             <h2 className="text-white text-lg md:text-2xl lg:text-3xl font-normal font-['Calistoga'] m-0 drop-shadow-sm leading-tight">
@@ -325,7 +326,6 @@ const prereqCheck = checkPrereqs(course);
         </section>
 
         {/* 2. Standing Year Selection */}
-        {/* MOBILE FIX: Reduced padding, tightened gap, shrunk font sizes and input height */}
         <section className="w-full bg-white rounded-xl border border-gray-200 p-4 lg:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 lg:gap-4 shadow-sm">
           <div className="flex-1">
             <h3 className="text-[#003366] text-base md:text-lg lg:text-xl font-bold font-['Calistoga'] m-0 leading-tight">
@@ -361,10 +361,9 @@ const prereqCheck = checkPrereqs(course);
         </section>
 
         {/* 3. Toggles for Curriculum Navigation */}
-        <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full mt-2">
+        <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full">
           
-          {/* YEAR TOGGLE (Right Side) */}
-          {/* MOBILE FIX: grid-cols-2 forces a 2x2 grid on mobile, lg:flex returns it to a single row on desktop */}
+          {/* YEAR TOGGLE */}
           <div className="grid grid-cols-2 lg:flex lg:flex-nowrap bg-[#E9EBEF] rounded-3xl lg:rounded-full p-1 w-full lg:w-fit gap-1 lg:gap-0">
             {[1, 2, 3, 4].map(y => (
               <button
@@ -379,7 +378,7 @@ const prereqCheck = checkPrereqs(course);
             ))}
           </div>
           
-          {/* SEMESTER TOGGLE (Left Side) */}
+          {/* SEMESTER TOGGLE */}
           <div className="flex bg-[#E9EBEF] rounded-full p-1 w-full lg:w-fit">
             {['1st Semester', '2nd Semester', ...(viewYear === 2 ? ['Summer'] : [])].map(sem => (
               <button
@@ -399,10 +398,7 @@ const prereqCheck = checkPrereqs(course);
         {/* 4. Table Layout for Courses */}
         <section className="w-full bg-white rounded-xl border border-stone-300 overflow-hidden shadow-sm">
           
-          {/* ==========================================
-              MOBILE FIX: Slim List (Hidden on Desktop) 
-              Shows ONLY: Description, Status, and Star
-          ========================================== */}
+          {/* MOBILE FIX: Slim List (Hidden on Desktop) */}
           <div className="block lg:hidden">
             {filteredCurriculum.length === 0 ? (
               <div className="p-8 text-center text-gray-500 font-['Inter']">
@@ -455,7 +451,7 @@ const prereqCheck = checkPrereqs(course);
                           </span>
                         )}
 
-                        {/* Petition Star Button (Icon Only) */}
+                        {/* Petition Star Button */}
                         <button
                           onClick={(e) => togglePetition(course, e)}
                           disabled={!isSelected} 
@@ -478,9 +474,7 @@ const prereqCheck = checkPrereqs(course);
             )}
           </div>
 
-          {/* ==========================================
-              DESKTOP VIEW: Full Table (Hidden on Mobile)
-          ========================================== */}
+          {/* DESKTOP VIEW: Full Table (Hidden on Mobile) */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
@@ -575,18 +569,14 @@ const prereqCheck = checkPrereqs(course);
       </div>
 
       {/* Floating Bottom Bar */}
-      {/* MOBILE FIX: Reduced padding (p-3 md:p-4) to make the bar much shorter */}
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-stone-300 p-3 md:p-4 lg:p-6 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50">
-        {/* MOBILE FIX: Forced flex-row so everything stays on exactly ONE line */}
         <div className="w-full max-w-[1440px] mx-auto flex flex-row items-center justify-between gap-2 px-1 lg:px-[90px]">
           
           <div className="text-black/70 text-[11px] sm:text-xs lg:text-lg font-['Caladea'] whitespace-nowrap shrink overflow-hidden text-ellipsis">
-            {/* MOBILE VIEW: Ultra-short text so it fits perfectly */}
             <span className="md:hidden font-bold">
               {enrolledCoursesCount} Enrolled | Yr {yearStanding}
             </span>
             
-            {/* DESKTOP VIEW: Your original full text */}
             <span className="hidden md:inline">
               {enrolledCoursesCount === 0 
                 ? "0 Courses Currently Enrolled" 
@@ -599,14 +589,12 @@ const prereqCheck = checkPrereqs(course);
           <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={() => navigate('/dashboard')}
-              // MOBILE FIX: Shrunk text size to xs, tightened padding, smaller rounded corners
               className="px-3 py-1.5 md:px-6 md:py-2.5 rounded-lg md:rounded-xl border border-stone-300 text-black font-['Caladea'] text-xs md:text-base hover:bg-gray-50 transition-colors"
             >
               Skip
             </button>
             <button 
               onClick={handleSaveSetup} 
-              // MOBILE FIX: Shrunk text to "Save" on phones, tighter padding
               className="px-4 py-1.5 md:px-8 md:py-2.5 rounded-lg md:rounded-xl bg-[#003366] text-white font-['Caladea'] text-xs md:text-base hover:bg-[#002244] hover:shadow-lg transition-all"
             >
               <span className="md:hidden">Save</span>

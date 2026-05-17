@@ -1,0 +1,113 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export const TermsAndConditions = () => {
+  const navigate = useNavigate();
+
+  return (
+    <main className="flex flex-col w-full min-h-screen bg-[#F4F7FA] font-sans pb-12 md:pb-24">
+      
+      {/* Simple Header */}
+      <header className="w-full h-[60px] md:h-[90px] flex items-center shadow-md z-50 shrink-0 bg-gradient-to-r from-[#001A33] to-[#004080]">
+        <div className="w-full max-w-[1440px] mx-auto flex items-center px-4 md:px-6">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-white hover:text-[#FFCC00] transition-colors font-['Inter'] font-bold text-sm md:text-base"
+          >
+            <span>←</span> Back
+          </button>
+        </div>
+      </header>
+
+      {/* Content Container */}
+      <div className="w-full max-w-4xl mx-auto px-4 md:px-6 lg:px-8 mt-6 md:mt-12">
+        <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-100 p-5 md:p-8 lg:p-12">
+          
+          {/* Title Section */}
+          <div className="border-b-2 border-gray-100 pb-4 md:pb-8 mb-5 md:mb-8">
+            <h1 className="text-[#003366] text-2xl md:text-3xl lg:text-4xl font-bold font-['Calistoga'] m-0 leading-tight">
+              Terms and Conditions for CourseTrackr
+            </h1>
+            <p className="text-gray-500 font-medium font-['Inter'] mt-2 md:mt-3 text-sm md:text-base">
+              Effective Date: <span className="text-[#003366] font-bold">May 20, 2026</span>
+            </p>
+          </div>
+
+          {/* Body Content */}
+          <div className="flex flex-col gap-6 md:gap-8 font-['Inter'] text-gray-600 leading-relaxed text-sm md:text-base">
+            
+            <p className="text-base md:text-lg text-gray-700">
+              Welcome to CourseTrackr. These Terms and Conditions outline the rules and regulations for the use of the CourseTrackr web application. By accessing or using this application, we assume you accept these terms and conditions in full. Do not continue to use CourseTrackr if you do not agree to all the terms and conditions stated on this page.
+            </p>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">1. Description of Service</h2>
+              <p>
+                CourseTrackr is a web-based application designed to assist students in mapping their academic progression. The service analyzes a student’s completed prerequisites and academic history to generate personalized recommendations for future courses.
+              </p>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">2. User Accounts and Eligibility</h2>
+              <ul className="list-disc pl-4 md:pl-6 flex flex-col gap-2 mt-1 md:mt-2">
+                <li><strong className="text-gray-800">Student-Exclusive Platform:</strong> Access to CourseTrackr is designated solely for student use. There are no administrative or faculty account tiers available to the general user base.</li>
+                <li><strong className="text-gray-800">Account Security:</strong> You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.</li>
+                <li><strong className="text-gray-800">Accurate Information:</strong> To receive accurate course suggestions, you agree to provide true, accurate, and complete information regarding your academic history and completed prerequisites.</li>
+              </ul>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">3. Advisory Nature of the Service (Disclaimer)</h2>
+              <ul className="list-disc pl-4 md:pl-6 flex flex-col gap-2 mt-1 md:mt-2">
+                <li><strong className="text-gray-800">Not Official Advising:</strong> The course suggestions and academic pathways provided by CourseTrackr are intended for informational and planning purposes only. CourseTrackr does not replace official academic advising from your university, nor does it guarantee course availability or official enrollment.</li>
+                <li><strong className="text-gray-800">Verification:</strong> It is your responsibility to verify all prerequisite requirements, credit hours, and graduation criteria with your institution's official registrar or academic department before finalizing any enrollment decisions.</li>
+                <li><strong className="text-gray-800">No Guarantee of Graduation:</strong> We are not liable for any delays in your graduation or academic progression resulting from reliance on the suggestions generated by this application.</li>
+              </ul>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">4. Acceptable Use</h2>
+              <p>You agree to use CourseTrackr only for its intended purpose of academic planning. You must not:</p>
+              <ul className="list-disc pl-4 md:pl-6 flex flex-col gap-2 mt-1 md:mt-2">
+                <li>Use the application in any way that causes, or may cause, damage to the application or impairment of the availability or accessibility of the service.</li>
+                <li>Attempt to bypass any security measures, reverse-engineer the application, or access backend infrastructure.</li>
+                <li>Input false academic data with the intent to manipulate the system or disrupt the service.</li>
+              </ul>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">5. Intellectual Property Rights</h2>
+              <p>
+                Unless otherwise stated, CourseTrackr and/or its licensors own the intellectual property rights for all material, code, algorithms, and content on the application. All intellectual property rights are reserved and protected under applicable laws, including the Intellectual Property Code of the Philippines. You may access this service for your own personal, non-commercial use, subject to restrictions set in these terms.
+              </p>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">6. Limitation of Liability</h2>
+              <p>
+                In no event shall the creators, developers, or affiliates of CourseTrackr be held liable for any indirect, consequential, or special liability arising out of or in any way related to your use of this application. The service is provided on an "as is" and "as available" basis without any warranties, express or implied.
+              </p>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">7. Governing Law and Jurisdiction</h2>
+              <p>
+                These Terms will be governed by and interpreted in accordance with the laws of the Republic of the Philippines. By using this application, you submit to the non-exclusive jurisdiction of the state and federal courts located in the Philippines for the resolution of any disputes.
+              </p>
+            </section>
+
+            <section className="flex flex-col gap-2 md:gap-3">
+              <h2 className="text-[#003366] text-xl md:text-2xl font-bold font-['Calistoga']">8. Changes to These Terms</h2>
+              <p>
+                We reserve the right to revise these Terms and Conditions at any time as we see fit. By using this application, you are expected to review these Terms on a regular basis to ensure you understand all terms and conditions governing the use of CourseTrackr.
+              </p>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default TermsAndConditions;

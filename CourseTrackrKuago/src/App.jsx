@@ -11,6 +11,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import ResetPassword  from './pages/ResetPassword'; // Adjust path as needed
 import {AboutUs} from './components/AboutUs'; // Adjust the path if they are in a different folder
 import {PrivacyPolicy}  from './components/PrivacyPolicy';
+import {TermsAndConditions} from './components/TermsAndConditions';
 // Inside your <Routes> block, add this:
 
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

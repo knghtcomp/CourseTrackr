@@ -82,7 +82,8 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Dashboard"
               onClick={() => navigate('/dashboard')}
-              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
+              // MOBILE FIX: Scaled down from w-10 h-10 to w-8 h-8 on phones to prevent overlapping
+              className={`flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'dashboard' 
                 ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
                 : 'hover:bg-white/10'
@@ -91,7 +92,8 @@ export const StudentDashboardHeaderSection = () => {
               <img 
                 src="/dashboard.svg" 
                 alt="Dashboard" 
-                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
+                // MOBILE FIX: Scaled icon down from w-5 h-5 to w-4 h-4 on phones
+                className={`w-4 h-4 md:w-5 md:h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'dashboard' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
@@ -104,7 +106,8 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Tracker"
               onClick={() => navigate('/tracker')}
-              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
+              // MOBILE FIX: Scaled down from w-10 h-10 to w-8 h-8 on phones
+              className={`flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'tracker' 
                 ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
                 : 'hover:bg-white/10'
@@ -113,7 +116,8 @@ export const StudentDashboardHeaderSection = () => {
               <img 
                 src="/trackr.svg" 
                 alt="Tracker" 
-                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
+                // MOBILE FIX: Scaled icon down from w-5 h-5 to w-4 h-4 on phones
+                className={`w-4 h-4 md:w-5 md:h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'tracker' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
@@ -126,7 +130,8 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Evaluation"
               onClick={() => navigate('/history')}
-              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
+              // MOBILE FIX: Scaled down from w-10 h-10 to w-8 h-8 on phones
+              className={`flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group ${
                 isActive === 'history' 
                 ? 'bg-[#FFCC00] shadow-[0_2px_10px_rgba(0,0,0,0.2)]' 
                 : 'hover:bg-white/10'
@@ -135,7 +140,8 @@ export const StudentDashboardHeaderSection = () => {
               <img 
                 src="/academichistory.svg" 
                 alt="Evaluation" 
-                className={`w-5 h-5 shrink-0 transition-all duration-300 ${
+                // MOBILE FIX: Scaled icon down from w-5 h-5 to w-4 h-4 on phones
+                className={`w-4 h-4 md:w-5 md:h-5 shrink-0 transition-all duration-300 ${
                   isActive === 'history' ? 'brightness-0 opacity-90' : 'brightness-0 invert opacity-70 group-hover:opacity-100'
                 }`} 
               />
@@ -169,7 +175,7 @@ export const StudentDashboardHeaderSection = () => {
             <button 
               title="Logout"
               onClick={handleLogout}
-              className="flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
+              className="flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
             >
               <img 
                 src="/logout.svg" 

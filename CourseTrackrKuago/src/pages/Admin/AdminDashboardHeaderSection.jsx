@@ -73,7 +73,7 @@ const AdminDashboardHeaderSection = () => {
             <button 
               title="Dashboard"
               onClick={() => navigate('/admin')}
-              className={`flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 ease-out active:scale-95 group ${
+              className={`flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 ease-out active:scale-95 group ${
                 location.pathname === '/admin' || location.pathname === '/admin/dashboard'
                 ? 'bg-[#FFCC00] shadow-md' 
                 : 'hover:bg-white/10'
@@ -116,7 +116,7 @@ const AdminDashboardHeaderSection = () => {
             <button 
               title="Logout"
               onClick={handleLogout}
-              className="flex items-center justify-center md:gap-2 w-10 h-10 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
+              className="flex items-center justify-center md:gap-2 w-8 h-8 md:w-auto md:px-4 md:h-10 rounded-lg md:rounded-xl transition-all duration-300 active:scale-95 group hover:bg-white/10"
             >
               <img 
                 src="/logout.svg" 
